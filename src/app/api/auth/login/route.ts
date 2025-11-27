@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db"
 import { generateToken } from "@/lib/helpers"
 import { User } from "@/models/user.model"
 import bcrypt from "bcryptjs"
+import { cookies } from "next/headers"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {
@@ -25,7 +26,21 @@ export async function POST(req: NextRequest) {
 
     const token = generateToken(user._id.toString(), user.role)
 
-    return NextResponse.json({
+
+
+    // return NextResponse.json({
+    //   token,
+    //   user: {
+    //     id: user._id,
+    //     email: user.email,
+    //     fullName: user.fullName,
+    //     role: user.role,
+    //     status: user.status,
+    //   },
+    // })
+
+
+    const response = NextResponse.json({
       token,
       user: {
         id: user._id,
@@ -34,9 +49,22 @@ export async function POST(req: NextRequest) {
         role: user.role,
         status: user.status,
       },
-    })
+    });
+
+    // Cookie set
+    response.cookies.set("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, 
+    });
+
+    return response;
+
+    
   } catch (error) {
-    console.error("[v0] Login error:", error)
+    console.error("Login error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

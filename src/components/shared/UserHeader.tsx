@@ -7,7 +7,6 @@ import {
   LogOut,
   Menu,
   TrendingUp,
-  User,
 } from "lucide-react";
 import React from "react";
 import {
@@ -25,13 +24,15 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 
+import ProfileDropdown from "./ProfileDropdown";
+
 const memberNavItems = [
   { label: "Dashboard", href: "/dashboard", icon: Home },
   { label: "Deposits", href: "/dashboard/deposits", icon: CreditCard },
   { label: "Investments", href: "/dashboard/investments", icon: TrendingUp },
   { label: "Withdrawals", href: "/dashboard/withdrawals", icon: LogOut },
   // { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
-  { label: "Profile", href: "/dashboard/profile", icon: User },
+  // { label: "Profile", href: "/dashboard/profile", icon: User },
   { label: "Statements", href: "/dashboard/statements", icon: FileText },
 ];
 
@@ -95,9 +96,8 @@ const UserHeader = () => {
             4
           </span>
         </Link>
-        <span>
-          <User />
-        </span>
+
+        <ProfileDropdown />
       </div>
     </div>
   );

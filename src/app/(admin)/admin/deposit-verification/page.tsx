@@ -96,7 +96,7 @@ export default function DepositVerificationPage() {
       }
     } catch (err) {
       setError("An error occurred");
-      console.error("[v0] Verify error:", err);
+      console.error("Verify error:", err);
     } finally {
       setProcessing(false);
     }

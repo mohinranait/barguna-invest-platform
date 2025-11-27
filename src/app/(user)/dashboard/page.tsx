@@ -43,7 +43,7 @@ const UserDashboard = () => {
 
   return (
     <React.Fragment>
-      <div className="bg-green-700 pt-4 pb-6 ">
+      <div className="bg-green-100 pt-4 pb-6 ">
         <UserContainer>
           <UserHeader />
           <div className="flex items-center pt-4 justify-between">

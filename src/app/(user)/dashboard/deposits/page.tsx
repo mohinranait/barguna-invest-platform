@@ -71,7 +71,7 @@ export default function DepositsPage() {
         setDeposits(data.deposits);
       }
     } catch (err) {
-      console.error("[v0] Fetch deposits error:", err);
+      console.error("Fetch deposits error:", err);
     } finally {
       setLoading(false);
     }
@@ -126,7 +126,7 @@ export default function DepositsPage() {
       }
     } catch (err) {
       setError("An error occurred");
-      console.error("[v0] Submit error:", err);
+      console.error("Submit error:", err);
     } finally {
       setSubmitting(false);
     }

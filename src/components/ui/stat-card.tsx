@@ -25,7 +25,7 @@ export function StatCard({
       : "text-muted-foreground";
 
   return (
-    <Card className="p-6 gap-0 backdrop-blur-3xl">
+    <Card className="p-6 gap-0 backdrop-blur-3xl  ">
       <div className="flex items-start justify-between mb-4">
         <div className="text-primary">{icon}</div>
       </div>
