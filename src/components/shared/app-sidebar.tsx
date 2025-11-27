@@ -1,3 +1,4 @@
+"use client";
 import {
   Calendar,
   Currency,
@@ -15,10 +16,13 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "@/components/ui/sidebar";
+import Logo from "./Logo";
 
 // Menu items.
 const items = [
@@ -59,9 +63,19 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { open } = useSidebar();
   return (
     <Sidebar variant="sidebar" collapsible="icon">
       <SidebarContent>
+        <SidebarHeader>
+          {open ? (
+            <Logo />
+          ) : (
+            <span className="text-2xl uppercase font-bold text-primary">
+              BI
+            </span>
+          )}
+        </SidebarHeader>
         <SidebarGroup>
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
