@@ -2,7 +2,6 @@ import { connectDB } from "@/lib/db"
 import { generateToken } from "@/lib/helpers"
 import { User } from "@/models/user.model"
 import bcrypt from "bcryptjs"
-import { cookies } from "next/headers"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(req: NextRequest) {

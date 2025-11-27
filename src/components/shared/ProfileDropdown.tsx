@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import {
   DropdownMenu,
@@ -10,19 +11,27 @@ import {
 import LogoutButton from "../LogoutButton";
 import { LayoutDashboard, LogOut, User } from "lucide-react";
 import Link from "next/link";
+import { useUser } from "@/providers/UserProvider";
+import { Skeleton } from "../ui/skeleton";
 
 const ProfileDropdown = () => {
+  const { user, userLoading } = useUser();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
-        <span>
-          <User />
-        </span>
+        {userLoading ? (
+          <Skeleton className="w-24 h-6 rounded-md" />
+        ) : (
+          <span className="inline-flex items-center gap-1">
+            <User /> {user?.fullName}
+          </span>
+        )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <Link href={"/dashboard"}>
+        <Link href={user?.role === "admin" ? "/admin/dashboard" : "/dashboard"}>
           <DropdownMenuItem>
             <LayoutDashboard /> Dashboard
           </DropdownMenuItem>

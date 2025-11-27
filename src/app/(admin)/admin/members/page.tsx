@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,61 +12,63 @@ import {
   AlertCircle,
   Download,
 } from "lucide-react";
+import { IUser } from "@/types/user.type";
 
-const members = [
-  {
-    id: 1,
-    name: "Ahmed Rahman",
-    email: "ahmed@example.com",
-    phone: "+880 1712345678",
-    invested: 10000,
-    status: "Active",
-    kyc: "Verified",
-    joinDate: "Oct 15, 2024",
-  },
-  {
-    id: 2,
-    name: "Fatima Khan",
-    email: "fatima@example.com",
-    phone: "+880 1801234567",
-    invested: 30000,
-    status: "Active",
-    kyc: "Verified",
-    joinDate: "Sep 20, 2024",
-  },
-  {
-    id: 3,
-    name: "Rahman Ahmed",
-    email: "rahman@example.com",
-    phone: "+880 1912345678",
-    invested: 0,
-    status: "Pending",
-    kyc: "Pending",
-    joinDate: "Nov 28, 2024",
-  },
-  {
-    id: 4,
-    name: "Noor Alam",
-    email: "noor@example.com",
-    phone: "+880 1701234567",
-    invested: 50000,
-    status: "Active",
-    kyc: "Verified",
-    joinDate: "Aug 10, 2024",
-  },
-  {
-    id: 5,
-    name: "Sara Islam",
-    email: "sara@example.com",
-    phone: "+880 1611234567",
-    invested: 5000,
-    status: "Inactive",
-    kyc: "Expired",
-    joinDate: "Jun 05, 2024",
-  },
-];
+// const members = [
+//   {
+//     id: 1,
+//     name: "Ahmed Rahman",
+//     email: "ahmed@example.com",
+//     phone: "+880 1712345678",
+//     invested: 10000,
+//     status: "Active",
+//     kyc: "Verified",
+//     joinDate: "Oct 15, 2024",
+//   },
+//   {
+//     id: 2,
+//     name: "Fatima Khan",
+//     email: "fatima@example.com",
+//     phone: "+880 1801234567",
+//     invested: 30000,
+//     status: "Active",
+//     kyc: "Verified",
+//     joinDate: "Sep 20, 2024",
+//   },
+//   {
+//     id: 3,
+//     name: "Rahman Ahmed",
+//     email: "rahman@example.com",
+//     phone: "+880 1912345678",
+//     invested: 0,
+//     status: "Pending",
+//     kyc: "Pending",
+//     joinDate: "Nov 28, 2024",
+//   },
+//   {
+//     id: 4,
+//     name: "Noor Alam",
+//     email: "noor@example.com",
+//     phone: "+880 1701234567",
+//     invested: 50000,
+//     status: "Active",
+//     kyc: "Verified",
+//     joinDate: "Aug 10, 2024",
+//   },
+//   {
+//     id: 5,
+//     name: "Sara Islam",
+//     email: "sara@example.com",
+//     phone: "+880 1611234567",
+//     invested: 5000,
+//     status: "Inactive",
+//     kyc: "Expired",
+//     joinDate: "Jun 05, 2024",
+//   },
+// ];
 
 export default function MembersPage() {
+  const [members, setMembers] = useState<IUser[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMember, setSelectedMember] = useState<
     (typeof members)[0] | null
@@ -75,41 +77,65 @@ export default function MembersPage() {
 
   const filteredMembers = members.filter((member) => {
     const matchesSearch =
-      member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       member.email.toLowerCase().includes(searchTerm.toLowerCase());
-    if (filter === "active") return matchesSearch && member.status === "Active";
+    if (filter === "active") return matchesSearch && member.status === "active";
     if (filter === "pending")
-      return matchesSearch && member.status === "Pending";
+      return matchesSearch && member.status === "pending";
     if (filter === "kyc-pending")
-      return matchesSearch && member.kyc === "Pending";
+      return matchesSearch && member.kycStatus === "pending";
     return matchesSearch;
   });
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (
+    status: "active" | "pending" | "suspended" | "rejected"
+  ) => {
     switch (status) {
-      case "Active":
+      case "active":
         return "bg-green-100 text-green-700";
-      case "Pending":
+      case "pending":
         return "bg-yellow-100 text-yellow-700";
-      case "Inactive":
+      case "rejected":
         return "bg-gray-100 text-gray-700";
       default:
         return "bg-red-100 text-red-700";
     }
   };
 
-  const getKYCColor = (status: string) => {
+  const getKYCColor = (status: "pending" | "approved" | "rejected") => {
     switch (status) {
-      case "Verified":
+      case "approved":
         return "text-green-600";
-      case "Pending":
+      case "pending":
         return "text-yellow-600";
-      case "Expired":
+      case "rejected":
         return "text-red-600";
       default:
         return "text-muted-foreground";
     }
   };
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const res = await fetch("/api/admin/members", {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await res.json();
+        console.log({ data });
+
+        if (res.ok) {
+          setMembers(data?.members);
+        } else {
+          console.error("Failed to fetch members:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching members:", error);
+      }
+    };
+    fetchMembers();
+  }, []);
 
   return (
     <div className="p-6 md:p-8 space-y-6">
@@ -207,13 +233,13 @@ export default function MembersPage() {
             <tbody>
               {filteredMembers.map((member) => (
                 <tr
-                  key={member.id}
+                  key={member._id}
                   className="border-b hover:bg-muted/50 transition"
                 >
-                  <td className="py-3 font-medium">{member.name}</td>
+                  <td className="py-3 font-medium">{member.fullName}</td>
                   <td className="py-3 text-muted-foreground">{member.email}</td>
                   <td className="py-3 text-right font-semibold">
-                    ৳ {member.invested.toLocaleString()}
+                    ৳ {member.investedAmount.toLocaleString()}
                   </td>
                   <td className="py-3">
                     <span
@@ -224,16 +250,20 @@ export default function MembersPage() {
                       {member.status}
                     </span>
                   </td>
-                  <td className={`py-3 font-medium ${getKYCColor(member.kyc)}`}>
-                    {member.kyc === "Verified" ? (
+                  <td
+                    className={`py-3 font-medium ${getKYCColor(
+                      member.kycStatus
+                    )}`}
+                  >
+                    {member.kycStatus === "approved" ? (
                       <div className="flex items-center gap-1">
                         <UserCheck size={16} />
-                        {member.kyc}
+                        {member.kycStatus}
                       </div>
                     ) : (
                       <div className="flex items-center gap-1">
                         <AlertCircle size={16} />
-                        {member.kyc}
+                        {member.kycStatus}
                       </div>
                     )}
                   </td>
@@ -259,7 +289,7 @@ export default function MembersPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 sticky top-0 bg-card border-b flex items-center justify-between">
-              <h2 className="text-2xl font-bold">{selectedMember.name}</h2>
+              <h2 className="text-2xl font-bold">{selectedMember.fullName}</h2>
               <Button variant="ghost" onClick={() => setSelectedMember(null)}>
                 ✕
               </Button>
@@ -276,7 +306,7 @@ export default function MembersPage() {
                     <p className="text-xs text-muted-foreground mb-1">
                       Full Name
                     </p>
-                    <p className="font-medium">{selectedMember.name}</p>
+                    <p className="font-medium">{selectedMember.fullName}</p>
                   </div>
                   <div className="p-3 bg-muted/30 rounded">
                     <p className="text-xs text-muted-foreground mb-1">Email</p>
@@ -290,7 +320,7 @@ export default function MembersPage() {
                     <p className="text-xs text-muted-foreground mb-1">
                       Join Date
                     </p>
-                    <p className="font-medium">{selectedMember.joinDate}</p>
+                    <p className="font-medium">{selectedMember.createdAt}</p>
                   </div>
                 </div>
               </div>
@@ -306,7 +336,7 @@ export default function MembersPage() {
                       Total Invested
                     </p>
                     <p className="text-2xl font-bold text-primary">
-                      ৳ {selectedMember.invested.toLocaleString()}
+                      ৳ {selectedMember.investedAmount.toLocaleString()}
                     </p>
                   </div>
                   <div className="p-4 bg-green-100/30 rounded">
@@ -314,7 +344,10 @@ export default function MembersPage() {
                       Pool Share %
                     </p>
                     <p className="text-2xl font-bold text-green-600">
-                      {((selectedMember.invested / 95000) * 100).toFixed(2)}%
+                      {((selectedMember.investedAmount / 95000) * 100).toFixed(
+                        2
+                      )}
+                      %
                     </p>
                   </div>
                 </div>

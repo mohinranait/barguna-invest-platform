@@ -1,4 +1,5 @@
-import jwt from "jsonwebtoken"
+import jwt, { JwtPayload } from "jsonwebtoken"
+import { cookies } from "next/headers";
 
 const JWT_SECRET = process.env.NEXT_PUBLIC_JWT_SECRET || "your-super-secret-key"
 
@@ -16,3 +17,25 @@ export function verifyToken(token: string) {
     return null
   }
 }
+
+
+interface DecodedToken extends JwtPayload {
+  userId: string;
+  role: string;
+}
+
+// GET TOKEN INFORMATION
+export const isAuth = async (): Promise<DecodedToken | null> => {
+  const cookiesStore = await cookies();
+  const token = cookiesStore.get("token")?.value;
+  if (!token) {
+    return {
+      userId: "",
+      role: "",
+    };
+  }
+
+  const decoded = jwt.verify(token, JWT_SECRET) as DecodedToken;
+  return decoded;
+};
+

@@ -1,7 +1,6 @@
 import React from "react";
 import { SidebarTrigger } from "../ui/sidebar";
-import { Bell, User } from "lucide-react";
-import Link from "next/link";
+import { Bell } from "lucide-react";
 import ProfileDropdown from "./ProfileDropdown";
 
 const AdminHeader = () => {
