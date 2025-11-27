@@ -1,0 +1,383 @@
+"use client";
+
+import { useState } from "react";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Search,
+  Filter,
+  Eye,
+  UserCheck,
+  AlertCircle,
+  Download,
+} from "lucide-react";
+
+const members = [
+  {
+    id: 1,
+    name: "Ahmed Rahman",
+    email: "ahmed@example.com",
+    phone: "+880 1712345678",
+    invested: 10000,
+    status: "Active",
+    kyc: "Verified",
+    joinDate: "Oct 15, 2024",
+  },
+  {
+    id: 2,
+    name: "Fatima Khan",
+    email: "fatima@example.com",
+    phone: "+880 1801234567",
+    invested: 30000,
+    status: "Active",
+    kyc: "Verified",
+    joinDate: "Sep 20, 2024",
+  },
+  {
+    id: 3,
+    name: "Rahman Ahmed",
+    email: "rahman@example.com",
+    phone: "+880 1912345678",
+    invested: 0,
+    status: "Pending",
+    kyc: "Pending",
+    joinDate: "Nov 28, 2024",
+  },
+  {
+    id: 4,
+    name: "Noor Alam",
+    email: "noor@example.com",
+    phone: "+880 1701234567",
+    invested: 50000,
+    status: "Active",
+    kyc: "Verified",
+    joinDate: "Aug 10, 2024",
+  },
+  {
+    id: 5,
+    name: "Sara Islam",
+    email: "sara@example.com",
+    phone: "+880 1611234567",
+    invested: 5000,
+    status: "Inactive",
+    kyc: "Expired",
+    joinDate: "Jun 05, 2024",
+  },
+];
+
+export default function MembersPage() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedMember, setSelectedMember] = useState<
+    (typeof members)[0] | null
+  >(null);
+  const [filter, setFilter] = useState("all");
+
+  const filteredMembers = members.filter((member) => {
+    const matchesSearch =
+      member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      member.email.toLowerCase().includes(searchTerm.toLowerCase());
+    if (filter === "active") return matchesSearch && member.status === "Active";
+    if (filter === "pending")
+      return matchesSearch && member.status === "Pending";
+    if (filter === "kyc-pending")
+      return matchesSearch && member.kyc === "Pending";
+    return matchesSearch;
+  });
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "Active":
+        return "bg-green-100 text-green-700";
+      case "Pending":
+        return "bg-yellow-100 text-yellow-700";
+      case "Inactive":
+        return "bg-gray-100 text-gray-700";
+      default:
+        return "bg-red-100 text-red-700";
+    }
+  };
+
+  const getKYCColor = (status: string) => {
+    switch (status) {
+      case "Verified":
+        return "text-green-600";
+      case "Pending":
+        return "text-yellow-600";
+      case "Expired":
+        return "text-red-600";
+      default:
+        return "text-muted-foreground";
+    }
+  };
+
+  return (
+    <div className="p-6 md:p-8 space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Members Management</h1>
+          <p className="text-muted-foreground mt-1">
+            View and manage community members
+          </p>
+        </div>
+        <Button className="bg-primary hover:bg-primary/90 gap-2">
+          <Download size={20} /> Export List
+        </Button>
+      </div>
+
+      {/* Search & Filter */}
+      <Card className="p-6">
+        <div className="grid md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">
+              Search Members
+            </label>
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-3 text-muted-foreground"
+                size={20}
+              />
+              <Input
+                placeholder="Search by name or email..."
+                className="pl-10 h-11"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Status</label>
+            <select
+              className="w-full px-3 py-2 border border-border rounded-lg text-sm h-11"
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+            >
+              <option value="all">All Members</option>
+              <option value="active">Active Only</option>
+              <option value="pending">Pending Approval</option>
+              <option value="kyc-pending">KYC Pending</option>
+            </select>
+          </div>
+          <div className="flex items-end">
+            <Button
+              variant="outline"
+              className="w-full h-11 gap-2 bg-transparent"
+            >
+              <Filter size={20} /> More Filters
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Members Table */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between ">
+          <h2 className="text-lg font-semibold">
+            Members List ({filteredMembers.length})
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Total: {members.length} members
+          </p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left py-3 font-medium text-muted-foreground">
+                  Member
+                </th>
+                <th className="text-left py-3 font-medium text-muted-foreground">
+                  Email
+                </th>
+                <th className="text-right py-3 font-medium text-muted-foreground">
+                  Invested
+                </th>
+                <th className="text-left py-3 font-medium text-muted-foreground">
+                  Status
+                </th>
+                <th className="text-left py-3 font-medium text-muted-foreground">
+                  KYC
+                </th>
+                <th className="text-left py-3 font-medium text-muted-foreground">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredMembers.map((member) => (
+                <tr
+                  key={member.id}
+                  className="border-b hover:bg-muted/50 transition"
+                >
+                  <td className="py-3 font-medium">{member.name}</td>
+                  <td className="py-3 text-muted-foreground">{member.email}</td>
+                  <td className="py-3 text-right font-semibold">
+                    ৳ {member.invested.toLocaleString()}
+                  </td>
+                  <td className="py-3">
+                    <span
+                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                        member.status
+                      )}`}
+                    >
+                      {member.status}
+                    </span>
+                  </td>
+                  <td className={`py-3 font-medium ${getKYCColor(member.kyc)}`}>
+                    {member.kyc === "Verified" ? (
+                      <div className="flex items-center gap-1">
+                        <UserCheck size={16} />
+                        {member.kyc}
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <AlertCircle size={16} />
+                        {member.kyc}
+                      </div>
+                    )}
+                  </td>
+                  <td className="py-3">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedMember(member)}
+                      className="gap-1"
+                    >
+                      <Eye size={16} /> View
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+
+      {/* Member Detail Modal */}
+      {selectedMember && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="p-6 sticky top-0 bg-card border-b flex items-center justify-between">
+              <h2 className="text-2xl font-bold">{selectedMember.name}</h2>
+              <Button variant="ghost" onClick={() => setSelectedMember(null)}>
+                ✕
+              </Button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Personal Info */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">
+                  Personal Information
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="p-3 bg-muted/30 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Full Name
+                    </p>
+                    <p className="font-medium">{selectedMember.name}</p>
+                  </div>
+                  <div className="p-3 bg-muted/30 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">Email</p>
+                    <p className="font-medium">{selectedMember.email}</p>
+                  </div>
+                  <div className="p-3 bg-muted/30 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">Phone</p>
+                    <p className="font-medium">{selectedMember.phone}</p>
+                  </div>
+                  <div className="p-3 bg-muted/30 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Join Date
+                    </p>
+                    <p className="font-medium">{selectedMember.joinDate}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Investment Info */}
+              <div>
+                <h3 className="text-lg font-semibold mb-4">
+                  Investment Information
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-primary/10 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Total Invested
+                    </p>
+                    <p className="text-2xl font-bold text-primary">
+                      ৳ {selectedMember.invested.toLocaleString()}
+                    </p>
+                  </div>
+                  <div className="p-4 bg-green-100/30 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Pool Share %
+                    </p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {((selectedMember.invested / 95000) * 100).toFixed(2)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Admin Actions */}
+              <div className="grid md:grid-cols-2 gap-4">
+                <Button variant="outline" className="h-11 bg-transparent">
+                  Add Manual Deposit
+                </Button>
+                <Button variant="outline" className="h-11 bg-transparent">
+                  Process Withdrawal
+                </Button>
+                <Button variant="outline" className="h-11 bg-transparent">
+                  View Transaction History
+                </Button>
+                <Button variant="outline" className="h-11 bg-transparent">
+                  View KYC Documents
+                </Button>
+              </div>
+
+              {/* Status Management */}
+              <div className="p-4 bg-secondary/10 rounded border-2 border-secondary/20">
+                <h3 className="font-semibold mb-3">Update Member Status</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Account Status
+                    </label>
+                    <select className="w-full px-3 py-2 border border-border rounded-lg text-sm h-11">
+                      <option selected>Active</option>
+                      <option>Inactive</option>
+                      <option>Suspended</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      KYC Status
+                    </label>
+                    <select className="w-full px-3 py-2 border border-border rounded-lg text-sm h-11">
+                      <option selected>Verified</option>
+                      <option>Pending Review</option>
+                      <option>Rejected</option>
+                    </select>
+                  </div>
+                  <Button className="w-full bg-primary hover:bg-primary/90">
+                    Save Changes
+                  </Button>
+                </div>
+              </div>
+
+              {/* Close Button */}
+              <Button
+                variant="outline"
+                className="w-full h-11 bg-transparent"
+                onClick={() => setSelectedMember(null)}
+              >
+                Close
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
