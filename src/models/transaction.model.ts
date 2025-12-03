@@ -7,6 +7,7 @@ const transactionSchema = new mongoose.Schema(
     amount: { type: Number, required: true, },
     paymentMethod: { type: String, enum: ['bkash', 'nagad',"HandCash"], default:'bkash' },
     senderPhone: { type: String,  },
+    receiverPhone: { type: String,  },
     transactionId: { type: String },
     status: { type: String, enum: ["pending", "approved",'verified', "cancel", "rejected"], default: "pending" },
     transactionType:{type: String, enum: ['withdraw','deposit'] },

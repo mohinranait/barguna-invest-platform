@@ -6,6 +6,7 @@ type BaseTransaction = {
     amount: number;
     paymentMethod: ITransactionMethod;
     senderPhone?: string;
+    receiverPhone?: string;
     transactionId?: string;
     status: ITransactionStatus;
     transactionType: ITransactionType;

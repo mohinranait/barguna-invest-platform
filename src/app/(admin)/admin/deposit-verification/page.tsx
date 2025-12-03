@@ -64,15 +64,15 @@ export default function DepositVerificationPage() {
       setError("");
       setMessage("");
 
-      const res = await fetch("/api/admin/transactions", {
-        method: "POST",
+      const res = await fetch(`/api/admin/transactions/${depositId}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
-          depositId,
           status,
-          rejectionReason: status === "rejected" ? rejectionReason : undefined,
+          note: status === "rejected" ? rejectionReason : "",
         }),
       });
 
@@ -169,7 +169,7 @@ export default function DepositVerificationPage() {
                         : ""
                     }
                   >
-                    <CardContent className="pt-6">
+                    <CardContent className="">
                       <div className="space-y-4">
                         <div className="flex items-start justify-between">
                           <div>
@@ -281,7 +281,7 @@ export default function DepositVerificationPage() {
             <div className="space-y-3">
               {deposits.map((deposit) => (
                 <Card key={deposit._id}>
-                  <CardContent className="pt-6">
+                  <CardContent className="">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-semibold">

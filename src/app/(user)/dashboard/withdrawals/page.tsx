@@ -7,6 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Plus, CheckCircle, Clock, AlertCircle, Download } from "lucide-react";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ITransactionForm, ITransactionMethod } from "@/types/transaction.type";
+import { useUser } from "@/providers/UserProvider";
 
 const withdrawalRequests = [
   {
@@ -33,8 +42,20 @@ const withdrawalRequests = [
 ];
 
 export default function WithdrawalsPage() {
+  const { user } = useUser();
   const [showForm, setShowForm] = useState(false);
   const [amount, setAmount] = useState("");
+
+  const [formData, setFormData] = useState<ITransactionForm>({
+    createdBy: user?._id as string,
+    amount: 0,
+    paymentMethod: "bkash",
+    transactionId: "",
+    senderPhone: "",
+    status: "pending",
+    transactionType: "deposit",
+    note: "",
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,34 +154,62 @@ export default function WithdrawalsPage() {
                     type="number"
                     placeholder="Enter amount"
                     value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        amount: Number(e.target.value),
+                      }))
+                    }
                     required
-                    className="h-11"
+                    className=""
                   />
                   <p className="text-xs text-muted-foreground mt-2">
                     Maximum: ৳ 11,250
                   </p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Withdrawal Method
-                  </label>
-                  <select className="w-full px-3 py-2 border border-border rounded-lg text-sm h-11">
-                    <option>Bank Account</option>
-                    <option>Mobile Banking (bKash)</option>
-                    <option>Mobile Banking (Nagad)</option>
-                  </select>
-                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Withdrawal Method
+                    </label>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Bank Details / Account Number
-                  </label>
-                  <Input
-                    placeholder="Enter your bank account or mobile number"
-                    className="h-11"
-                  />
+                    <Select
+                      value={formData.paymentMethod}
+                      onValueChange={(value) =>
+                        setFormData({
+                          ...formData,
+                          paymentMethod: value as ITransactionMethod,
+                        })
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="bkash">bKash</SelectItem>
+                        <SelectItem value="nagad">Nagad</SelectItem>
+                        <SelectItem value="HandCash">Hand Cash</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Receive number
+                    </label>
+                    <Input
+                      placeholder={`Enter your ${formData?.paymentMethod} number`}
+                      className=""
+                      value={amount}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          transactionId: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
                 </div>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700">

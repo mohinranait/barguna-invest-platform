@@ -10,6 +10,7 @@ const userSchema = new mongoose.Schema(
     status: { type: String, enum: ["pending", "active", "suspended", "rejected"], default: "pending" },
     kycStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
     investedAmount: { type: Number, default: 0 },
+    withdrawAmount: { type: Number, default: 0 },
     profitEarned: { type: Number, default: 0 },
     balance: { type: Number, default: 0 },
     bankAccount: {
