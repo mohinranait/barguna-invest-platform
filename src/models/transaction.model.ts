@@ -2,18 +2,13 @@ import mongoose, { models, Types } from "mongoose"
 
 const transactionSchema = new mongoose.Schema(
   {
-    userId: { type: Types.ObjectId, ref:"User", required:true },
-    updatedMans: [
-        {
-            userId: { type: Types.ObjectId, ref:"User", required:true },
-        }
-    ],
+    createdBy: { type: Types.ObjectId, ref:"User", required:true },
+    updatedBy: { type: Types.ObjectId },
     amount: { type: Number, required: true, },
-    paymentMethod: { type: String, enum: ['bKash', 'Nagad',"HandCash"], default:'bKash' },
+    paymentMethod: { type: String, enum: ['bkash', 'nagad',"HandCash"], default:'bkash' },
     senderPhone: { type: String,  },
     transactionId: { type: String },
-    status: { type: String, enum: ["pending", "approved", "cancel", "rejected"], default: "pending" },
-    kycStatus: { type: String, enum: ["pending", "approved", "rejected"], default: "pending" },
+    status: { type: String, enum: ["pending", "approved",'verified', "cancel", "rejected"], default: "pending" },
     transactionType:{type: String, enum: ['withdraw','deposit'] },
     note:{type: String },
     requestDate: { type: Date, default: Date.now },

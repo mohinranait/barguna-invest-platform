@@ -14,8 +14,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    console.log({});
+    
+
     const query = {
-        userId: authUser.userId
+        createdBy: authUser.userId
     }
 
     const transactions = await Transaction.find(query).lean()
@@ -24,7 +27,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Transactions not found" }, { status: 404 })
     }
 
-    return NextResponse.json({ transactions })
+    return NextResponse.json({ transactions, message:'success' },{ status: 200 })
   } catch (error) {
     console.error("Get transactions error:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

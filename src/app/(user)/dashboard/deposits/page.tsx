@@ -28,6 +28,12 @@ import LoadingSpinner from "@/components/ui/loading-spinner";
 import { CreditCard } from "lucide-react";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
+import { useUser } from "@/providers/UserProvider";
+import {
+  ITransaction,
+  ITransactionForm,
+  ITransactionMethod,
+} from "@/types/transaction.type";
 
 interface Deposit {
   _id: string;
@@ -41,34 +47,42 @@ interface Deposit {
 }
 
 export default function DepositsPage() {
-  //   const { token, user } = useAuth();
-  const token = "sample-token";
-  const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const { user } = useUser();
+  console.log({ user });
+
+  const [deposits, setDeposits] = useState<ITransaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    amount: "",
+  const [formData, setFormData] = useState<ITransactionForm>({
+    createdBy: user?._id as string,
+    amount: 0,
     paymentMethod: "bkash",
     transactionId: "",
-    phone: "",
+    senderPhone: "",
+    status: "pending",
+    transactionType: "deposit",
+    note: "",
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     fetchDeposits();
-  }, [token]);
+  }, []);
+  console.log({ formData });
 
   const fetchDeposits = async () => {
-    if (!token) return;
     try {
       setLoading(true);
-      const res = await fetch("/api/deposits/list", {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch("/api/member/transactions", {
+        method: "GET",
+        credentials: "include",
       });
       if (res.ok) {
         const data = await res.json();
-        setDeposits(data.deposits);
+        console.log({ resData: data });
+
+        setDeposits(data.transactions);
       }
     } catch (err) {
       console.error("Fetch deposits error:", err);
@@ -82,7 +96,7 @@ export default function DepositsPage() {
     setError("");
     setMessage("");
 
-    if (!formData.amount || !formData.transactionId || !formData.phone) {
+    if (!formData.amount || !formData.transactionId || !formData.senderPhone) {
       setError("Please fill in all fields");
       return;
     }
@@ -94,18 +108,13 @@ export default function DepositsPage() {
 
     try {
       setSubmitting(true);
-      const res = await fetch("/api/deposits/create", {
+      const res = await fetch("/api/member/transactions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          amount: Number(formData.amount),
-          paymentMethod: formData.paymentMethod,
-          transactionId: formData.transactionId,
-          phone: formData.phone,
-        }),
+        credentials: "include",
+        body: JSON.stringify({ ...formData, createdBy: user?._id as string }),
       });
 
       if (res.ok) {
@@ -114,10 +123,14 @@ export default function DepositsPage() {
           "Deposit request submitted successfully! Waiting for manager verification."
         );
         setFormData({
-          amount: "",
+          createdBy: user?._id as string,
+          amount: 0,
           paymentMethod: "bkash",
           transactionId: "",
-          phone: "",
+          senderPhone: "",
+          note: "",
+          status: "pending",
+          transactionType: "deposit",
         });
         fetchDeposits();
       } else {
@@ -202,7 +215,10 @@ export default function DepositsPage() {
                     placeholder="Enter amount"
                     value={formData.amount}
                     onChange={(e) =>
-                      setFormData({ ...formData, amount: e.target.value })
+                      setFormData({
+                        ...formData,
+                        amount: Number(e.target.value),
+                      })
                     }
                     min="1000"
                     step="100"
@@ -214,7 +230,10 @@ export default function DepositsPage() {
                   <Select
                     value={formData.paymentMethod}
                     onValueChange={(value) =>
-                      setFormData({ ...formData, paymentMethod: value })
+                      setFormData({
+                        ...formData,
+                        paymentMethod: value as ITransactionMethod,
+                      })
                     }
                   >
                     <SelectTrigger>
@@ -223,6 +242,7 @@ export default function DepositsPage() {
                     <SelectContent>
                       <SelectItem value="bkash">bKash</SelectItem>
                       <SelectItem value="nagad">Nagad</SelectItem>
+                      <SelectItem value="HandCash">Hand Cash</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -233,9 +253,9 @@ export default function DepositsPage() {
                     id="phone"
                     type="tel"
                     placeholder="880XXXXXXXXX"
-                    value={formData.phone}
+                    value={formData.senderPhone}
                     onChange={(e) =>
-                      setFormData({ ...formData, phone: e.target.value })
+                      setFormData({ ...formData, senderPhone: e.target.value })
                     }
                   />
                 </div>
@@ -276,8 +296,8 @@ export default function DepositsPage() {
           ) : (
             <div className="space-y-3">
               {deposits.map((deposit) => (
-                <Card key={deposit._id}>
-                  <CardContent className="pt-6">
+                <Card key={deposit._id} className="">
+                  <CardContent className="">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
@@ -291,9 +311,9 @@ export default function DepositsPage() {
                             </p>
                           </div>
                         </div>
-                        {deposit.rejectionReason && (
+                        {deposit.status === "rejected" && (
                           <p className="text-sm text-red-600 mt-2">
-                            Reason: {deposit.rejectionReason}
+                            Reason: {deposit.note}
                           </p>
                         )}
                       </div>

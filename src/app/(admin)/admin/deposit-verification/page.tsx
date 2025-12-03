@@ -11,45 +11,37 @@ import { StatCard } from "@/components/ui/stat-card";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { CheckCircle, DollarSign } from "lucide-react";
-
-interface Deposit {
-  _id: string;
-  userId: { fullName: string; phone: string; email: string };
-  amount: number;
-  paymentMethod: string;
-  transactionId: string;
-  phone: string;
-  status: "pending" | "verified" | "rejected";
-  createdAt: string;
-}
+import { useUser } from "@/providers/UserProvider";
+import { ITransaction } from "@/types/transaction.type";
 
 export default function DepositVerificationPage() {
-  const token = "";
-  const user = { role: "manager" };
-  const [deposits, setDeposits] = useState<Deposit[]>([]);
+  const { user } = useUser();
+  const [deposits, setDeposits] = useState<ITransaction[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedDeposit, setSelectedDeposit] = useState<Deposit | null>(null);
+  const [selectedDeposit, setSelectedDeposit] = useState<ITransaction | null>(
+    null
+  );
   const [rejectionReason, setRejectionReason] = useState("");
   const [processing, setProcessing] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (user?.role === "manager") {
+    if (user?.role === "manager" || user?.role === "admin") {
       fetchPendingDeposits();
     }
-  }, [token, user]);
+  }, [user]);
 
   const fetchPendingDeposits = async () => {
-    if (!token) return;
     try {
       setLoading(true);
-      const res = await fetch("/api/deposits/pending", {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch("/api/admin/transactions", {
+        method: "GET",
+        credentials: "include",
       });
       if (res.ok) {
         const data = await res.json();
-        setDeposits(data.deposits);
+        setDeposits(data.transactions);
       }
     } catch (err) {
       console.error(" Fetch pending deposits error:", err);
@@ -72,11 +64,10 @@ export default function DepositVerificationPage() {
       setError("");
       setMessage("");
 
-      const res = await fetch("/api/deposits/verify", {
+      const res = await fetch("/api/admin/transactions", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           depositId,
@@ -197,15 +188,15 @@ export default function DepositVerificationPage() {
                         <div className="grid gap-2 text-sm">
                           <div>
                             <span className="font-medium">Member:</span>{" "}
-                            {deposit.userId.fullName}
+                            {deposit.createdBy.fullName}
                           </div>
                           <div>
                             <span className="font-medium">Email:</span>{" "}
-                            {deposit.userId.email}
+                            {deposit.createdBy.email}
                           </div>
                           <div>
                             <span className="font-medium">Phone:</span>{" "}
-                            {deposit.userId.phone}
+                            {deposit.createdBy.phone}
                           </div>
                           <div>
                             <span className="font-medium">Transaction ID:</span>{" "}
@@ -297,7 +288,7 @@ export default function DepositVerificationPage() {
                           ৳{deposit.amount.toLocaleString()}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {deposit.userId.fullName}
+                          {deposit.createdBy.fullName}
                         </p>
                       </div>
                       <StatusBadge status={deposit.status}>

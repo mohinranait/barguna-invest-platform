@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 interface StatusBadgeProps {
   status?:
     | "active"
+    | "approved"
     | "pending"
     | "completed"
     | "failed"
@@ -11,7 +12,8 @@ interface StatusBadgeProps {
     | "verified"
     | "rejected"
     | "success"
-    | "error";
+    | "error"
+    | "cancel";
   children?: React.ReactNode;
   size?: "sm" | "md" | "lg";
 }
@@ -23,6 +25,7 @@ export function StatusBadge({
 }: StatusBadgeProps) {
   const statusMap = {
     active: "bg-green-100 text-green-700",
+    approved: "bg-green-100 text-green-700",
     pending: "bg-yellow-100 text-yellow-700",
     completed: "bg-blue-100 text-blue-700",
     failed: "bg-red-100 text-red-700",
@@ -31,6 +34,7 @@ export function StatusBadge({
     rejected: "bg-red-100 text-red-700",
     success: "bg-green-100 text-green-700",
     error: "bg-red-100 text-red-700",
+    cancel: "bg-red-100 text-red-700",
   };
 
   const sizeMap = {
