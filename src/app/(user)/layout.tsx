@@ -1,4 +1,5 @@
 import UserHeader from "@/components/shared/UserHeader";
+import UserProvider from "@/providers/UserProvider";
 import React from "react";
 
 type Props = {
@@ -6,12 +7,14 @@ type Props = {
 };
 const UserLayout = ({ children }: Props) => {
   return (
-    <div className=" min-h-screen ">
-      <div className="">
-        {/* <UserHeader /> */}
-        <div className="">{children}</div>
+    <UserProvider>
+      <div className=" min-h-screen ">
+        <div className="">
+          {/* <UserHeader /> */}
+          <div className="">{children}</div>
+        </div>
       </div>
-    </div>
+    </UserProvider>
   );
 };
 
