@@ -76,6 +76,7 @@ export default function WithdrawalsPage() {
     }
   };
 
+  // Status badge
   const getStatusBg = (status: string) => {
     switch (status) {
       case "Completed":
