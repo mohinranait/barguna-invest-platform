@@ -46,6 +46,7 @@ export default function WithdrawalsPage() {
   const [showForm, setShowForm] = useState(false);
   const [amount, setAmount] = useState("");
 
+  // Form state
   const [formData, setFormData] = useState<ITransactionForm>({
     createdBy: user?._id as string,
     amount: 0,
@@ -57,12 +58,14 @@ export default function WithdrawalsPage() {
     note: "",
   });
 
+  // Form submit method
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowForm(false);
     setAmount("");
   };
 
+  // Icon status
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Completed":
