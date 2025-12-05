@@ -143,6 +143,7 @@ export default function DepositVerificationPage() {
         </Alert>
       )}
 
+      {/* Tabs for admin deposit verification */}
       <Tabs defaultValue="pending" className="w-full">
         <TabsList>
           <TabsTrigger value="pending">Pending ({pendingCount})</TabsTrigger>
