@@ -17,6 +17,7 @@ import {
 import { ITransactionForm, ITransactionMethod } from "@/types/transaction.type";
 import { useUser } from "@/providers/UserProvider";
 
+// Fake withdraw data
 const withdrawalRequests = [
   {
     id: 1,
