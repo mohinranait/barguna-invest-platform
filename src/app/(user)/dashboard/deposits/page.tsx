@@ -30,38 +30,24 @@ import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
 import { useUser } from "@/providers/UserProvider";
 import {
-  ITransaction,
-  ITransactionForm,
-  ITransactionMethod,
-} from "@/types/transaction.type";
-
-interface Deposit {
-  _id: string;
-  amount: number;
-  paymentMethod: string;
-  transactionId: string;
-  phone: string;
-  status: "pending" | "verified" | "rejected";
-  rejectionReason?: string;
-  createdAt: string;
-}
+  IDeposit,
+  IDepositRequest,
+  TDepositMethod,
+} from "@/types/deposit.type";
 
 export default function DepositsPage() {
   const { user } = useUser();
-  console.log({ user });
 
-  const [deposits, setDeposits] = useState<ITransaction[]>([]);
+  const [deposits, setDeposits] = useState<IDeposit[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [formData, setFormData] = useState<ITransactionForm>({
+  const [formData, setFormData] = useState<IDepositRequest>({
     createdBy: user?._id as string,
     amount: 0,
     paymentMethod: "bkash",
     transactionId: "",
-    senderPhone: "",
     status: "pending",
-    transactionType: "deposit",
-    note: "",
+    depositNumber: "",
   });
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -74,7 +60,7 @@ export default function DepositsPage() {
   const fetchDeposits = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/member/transactions", {
+      const res = await fetch("/api/member/deposit", {
         method: "GET",
         credentials: "include",
       });
@@ -82,7 +68,7 @@ export default function DepositsPage() {
         const data = await res.json();
         console.log({ resData: data });
 
-        setDeposits(data.transactions);
+        setDeposits(data.deposits);
       }
     } catch (err) {
       console.error("Fetch deposits error:", err);
@@ -96,7 +82,11 @@ export default function DepositsPage() {
     setError("");
     setMessage("");
 
-    if (!formData.amount || !formData.transactionId || !formData.senderPhone) {
+    if (
+      !formData.amount ||
+      !formData.transactionId ||
+      !formData.depositNumber
+    ) {
       setError("Please fill in all fields");
       return;
     }
@@ -108,7 +98,7 @@ export default function DepositsPage() {
 
     try {
       setSubmitting(true);
-      const res = await fetch("/api/member/transactions", {
+      const res = await fetch("/api/member/deposit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -127,10 +117,8 @@ export default function DepositsPage() {
           amount: 0,
           paymentMethod: "bkash",
           transactionId: "",
-          senderPhone: "",
-          note: "",
+          depositNumber: "",
           status: "pending",
-          transactionType: "deposit",
         });
         fetchDeposits();
       } else {
@@ -146,7 +134,7 @@ export default function DepositsPage() {
   };
 
   const totalDeposited = deposits
-    .filter((d) => d.status === "verified")
+    .filter((d) => d.status === "approved")
     .reduce((sum, d) => sum + d.amount, 0);
 
   const pendingAmount = deposits
@@ -232,7 +220,7 @@ export default function DepositsPage() {
                     onValueChange={(value) =>
                       setFormData({
                         ...formData,
-                        paymentMethod: value as ITransactionMethod,
+                        paymentMethod: value as TDepositMethod,
                       })
                     }
                   >
@@ -253,9 +241,12 @@ export default function DepositsPage() {
                     id="phone"
                     type="tel"
                     placeholder="880XXXXXXXXX"
-                    value={formData.senderPhone}
+                    value={formData.depositNumber}
                     onChange={(e) =>
-                      setFormData({ ...formData, senderPhone: e.target.value })
+                      setFormData({
+                        ...formData,
+                        depositNumber: e.target.value,
+                      })
                     }
                   />
                 </div>

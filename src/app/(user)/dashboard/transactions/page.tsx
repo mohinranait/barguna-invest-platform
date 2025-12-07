@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Download } from "lucide-react";
-import React from "react";
+import React, { useState } from "react";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
 
@@ -26,6 +26,7 @@ const investments = [
 ];
 
 export default function InvestmentsPage() {
+  const [historys, setHistorys] = useState([]);
   return (
     <React.Fragment>
       <UserContainer className="pt-4">

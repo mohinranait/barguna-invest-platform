@@ -12,13 +12,16 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { CheckCircle, DollarSign } from "lucide-react";
 import { useUser } from "@/providers/UserProvider";
-import { IDeposit } from "@/types/deposit.type";
+import { IWithdraw } from "@/types/withdraw.type";
+import { format } from "date-fns";
 
-export default function DepositVerificationPage() {
+export default function WithdrawVerificationPage() {
   const { user } = useUser();
-  const [deposits, setDeposits] = useState<IDeposit[]>([]);
+  const [withdraws, setWithdraws] = useState<IWithdraw[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedDeposit, setSelectedDeposit] = useState<IDeposit | null>(null);
+  const [selectedWithdraw, setSelectedWithdraw] = useState<IWithdraw | null>(
+    null
+  );
   const [rejectionReason, setRejectionReason] = useState("");
   const [processing, setProcessing] = useState(false);
   const [message, setMessage] = useState("");
@@ -26,30 +29,30 @@ export default function DepositVerificationPage() {
 
   useEffect(() => {
     if (user?.role === "manager" || user?.role === "admin") {
-      fetchPendingDeposits();
+      fetchWithdraws();
     }
   }, [user]);
 
-  const fetchPendingDeposits = async () => {
+  const fetchWithdraws = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/deposit", {
+      const res = await fetch("/api/admin/withdraw", {
         method: "GET",
         credentials: "include",
       });
       if (res.ok) {
         const data = await res.json();
-        setDeposits(data.deposits);
+        setWithdraws(data.withdrawals);
       }
     } catch (err) {
-      console.error(" Fetch pending deposits error:", err);
+      console.error(" Fetch pending withdrawals error:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleVerify = async (
-    depositId: string,
+    withdrawId: string,
     status: "approved" | "rejected"
   ) => {
     if (status === "rejected" && !rejectionReason.trim()) {
@@ -62,7 +65,7 @@ export default function DepositVerificationPage() {
       setError("");
       setMessage("");
 
-      const res = await fetch(`/api/admin/deposit/${depositId}`, {
+      const res = await fetch(`/api/admin/withdraw/${withdrawId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -77,27 +80,29 @@ export default function DepositVerificationPage() {
       const data = await res.json();
 
       if (res.ok) {
-        setMessage(`Deposit ${status} successfully!`);
-        setSelectedDeposit(null);
+        setMessage(`withdraw ${status} successfully!`);
+        setSelectedWithdraw(null);
         setRejectionReason("");
-        fetchPendingDeposits();
+        fetchWithdraws();
 
-        // Create new transaction
-        await fetch(`/api/admin/transactions`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            createdBy: user?._id,
-            amount: selectedDeposit?.amount,
-            type: "deposit",
-            referenceId: data?.deposit?._id,
-          }),
-        });
+        if (status === "approved") {
+          // Create new transaction
+          await fetch(`/api/admin/transactions`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              createdBy: user?._id,
+              amount: selectedWithdraw?.amount,
+              type: "withdraw",
+              referenceId: data?.withdraw?._id,
+            }),
+          });
+        }
       } else {
-        setError(data.error || "Failed to process deposit");
+        setError(data.error || "Failed to process withdraw");
       }
     } catch (err) {
       setError("An error occurred");
@@ -107,13 +112,13 @@ export default function DepositVerificationPage() {
     }
   };
 
-  const pendingCount = deposits.filter((d) => d.status === "pending").length;
-  const totalAmount = deposits.reduce((sum, d) => sum + d.amount, 0);
+  const pendingCount = withdraws.filter((d) => d.status === "pending").length;
+  const totalAmount = withdraws.reduce((sum, d) => sum + d.amount, 0);
 
   if (user?.role !== "manager" && user?.role !== "admin") {
     return (
       <div className="text-center py-8 text-gray-500">
-        Access denied. Only managers can verify deposits.
+        Access denied. Only managers can verify withdraw.
       </div>
     );
   }
@@ -123,9 +128,9 @@ export default function DepositVerificationPage() {
       {/* header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Deposit Requests</h1>
+          <h1 className="text-3xl font-bold">Withdraw Requests</h1>
           <p className="text-muted-foreground mt-1">
-            View and manage community deposit requests
+            View and manage community withdraw requests
           </p>
         </div>
       </div>
@@ -134,7 +139,7 @@ export default function DepositVerificationPage() {
       <div className="grid gap-4 md:grid-cols-2">
         <StatCard
           icon={<CheckCircle className="text-primary" size={24} />}
-          label="Pending Deposits"
+          label="Pending Withdraw"
           value={pendingCount.toString()}
         />
         <StatCard
@@ -157,29 +162,29 @@ export default function DepositVerificationPage() {
         </Alert>
       )}
 
-      {/* Tabs for admin deposit verification */}
+      {/* Tabs for admin withdraw verification */}
       <Tabs defaultValue="pending" className="w-full">
         <TabsList>
           <TabsTrigger value="pending">Pending ({pendingCount})</TabsTrigger>
-          <TabsTrigger value="all">All Deposits</TabsTrigger>
+          <TabsTrigger value="all">All Withdraw</TabsTrigger>
         </TabsList>
 
         <TabsContent value="pending" className="space-y-4">
           {loading ? (
             <LoadingSpinner />
-          ) : deposits.filter((d) => d.status === "pending").length === 0 ? (
+          ) : withdraws.filter((d) => d.status === "pending").length === 0 ? (
             <Card className="text-center py-8">
-              <p className="text-gray-500">No pending deposits</p>
+              <p className="text-gray-500">No pending withdraws</p>
             </Card>
           ) : (
             <div className="grid gap-4">
-              {deposits
+              {withdraws
                 .filter((d) => d.status === "pending")
-                .map((deposit) => (
+                .map((withdraw) => (
                   <Card
-                    key={deposit._id}
+                    key={withdraw._id}
                     className={
-                      selectedDeposit?._id === deposit._id
+                      selectedWithdraw?._id === withdraw._id
                         ? "border-blue-500"
                         : ""
                     }
@@ -189,45 +194,47 @@ export default function DepositVerificationPage() {
                         <div className="flex items-start justify-between">
                           <div>
                             <p className="font-semibold text-lg">
-                              ৳{deposit.amount.toLocaleString()}
+                              ৳{withdraw.amount.toLocaleString()}
                             </p>
                             <p className="text-sm text-gray-600">
-                              {deposit.paymentMethod.toUpperCase()}
+                              {withdraw.method.toUpperCase()}
                             </p>
                           </div>
-                          <StatusBadge status={deposit.status}>
-                            {deposit.status}
+                          <StatusBadge status={withdraw.status}>
+                            {withdraw.status}
                           </StatusBadge>
                         </div>
 
                         <div className="grid gap-2 text-sm">
                           <div>
                             <span className="font-medium">Member:</span>{" "}
-                            {deposit.createdBy.fullName}
+                            {withdraw.createdBy?.fullName}
                           </div>
                           <div>
                             <span className="font-medium">Email:</span>{" "}
-                            {deposit.createdBy.email}
+                            {withdraw.createdBy.email}
                           </div>
                           <div>
                             <span className="font-medium">Phone:</span>{" "}
-                            {deposit.createdBy.phone}
+                            {withdraw.createdBy.phone}
                           </div>
+
                           <div>
-                            <span className="font-medium">Transaction ID:</span>{" "}
-                            {deposit.transactionId}
-                          </div>
-                          <div>
-                            <span className="font-medium">Deposit Number:</span>{" "}
-                            {deposit.depositNumber}
+                            <span className="font-medium">
+                              Withdraw Number:
+                            </span>{" "}
+                            {withdraw.accountNumber}
                           </div>
                           <div>
                             <span className="font-medium">Date:</span>{" "}
-                            {new Date(deposit.createdAt).toLocaleString()}
+                            {format(
+                              new Date(withdraw.updatedAt),
+                              "MMM dd, yyyy - hh:mm a"
+                            )}
                           </div>
                         </div>
 
-                        {selectedDeposit?._id === deposit._id && (
+                        {selectedWithdraw?._id === withdraw._id && (
                           <div className="mt-4 pt-4 border-t space-y-3">
                             <div>
                               <Label htmlFor="reason" className="mb-2">
@@ -246,7 +253,7 @@ export default function DepositVerificationPage() {
                             <div className="flex gap-2">
                               <Button
                                 onClick={() =>
-                                  handleVerify(deposit._id, "approved")
+                                  handleVerify(withdraw._id, "approved")
                                 }
                                 disabled={processing}
                                 className="flex-1 bg-green-600 hover:bg-green-700"
@@ -255,7 +262,7 @@ export default function DepositVerificationPage() {
                               </Button>
                               <Button
                                 onClick={() =>
-                                  handleVerify(deposit._id, "rejected")
+                                  handleVerify(withdraw._id, "rejected")
                                 }
                                 disabled={processing}
                                 variant="destructive"
@@ -265,7 +272,7 @@ export default function DepositVerificationPage() {
                               </Button>
                               <Button
                                 onClick={() => {
-                                  setSelectedDeposit(null);
+                                  setSelectedWithdraw(null);
                                   setRejectionReason("");
                                 }}
                                 variant="outline"
@@ -276,13 +283,13 @@ export default function DepositVerificationPage() {
                           </div>
                         )}
 
-                        {selectedDeposit?._id !== deposit._id && (
+                        {selectedWithdraw?._id !== withdraw._id && (
                           <Button
-                            onClick={() => setSelectedDeposit(deposit)}
+                            onClick={() => setSelectedWithdraw(withdraw)}
                             variant="outline"
                             className="w-full"
                           >
-                            Review
+                            Review withdraw request
                           </Button>
                         )}
                       </div>
@@ -298,20 +305,20 @@ export default function DepositVerificationPage() {
             <LoadingSpinner />
           ) : (
             <div className="space-y-3">
-              {deposits.map((deposit) => (
-                <Card key={deposit._id}>
+              {withdraws.map((withdraw) => (
+                <Card key={withdraw._id}>
                   <CardContent className="">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="font-semibold">
-                          ৳{deposit.amount.toLocaleString()}
+                          ৳{withdraw.amount.toLocaleString()}
                         </p>
                         <p className="text-sm text-gray-600">
-                          {deposit.createdBy.fullName}
+                          {withdraw.createdBy.fullName}
                         </p>
                       </div>
-                      <StatusBadge status={deposit.status}>
-                        {deposit.status}
+                      <StatusBadge status={withdraw.status}>
+                        {withdraw.status}
                       </StatusBadge>
                     </div>
                   </CardContent>

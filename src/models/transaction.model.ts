@@ -12,7 +12,6 @@ const transactionSchema = new mongoose.Schema(
     referenceId: {
       // depositId / profitId / withdrawId
       type: Types.ObjectId, 
-      ref: 'User',
       required: true,
   },
   },

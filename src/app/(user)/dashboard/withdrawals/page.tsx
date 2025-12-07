@@ -1,12 +1,20 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, CheckCircle, Clock, AlertCircle, Download } from "lucide-react";
+import {
+  Plus,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Download,
+  LoaderCircle,
+} from "lucide-react";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
+import { compareAsc, format } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -14,8 +22,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ITransactionForm, ITransactionMethod } from "@/types/transaction.type";
+import { ITransactionMethod } from "@/types/transaction.type";
 import { useUser } from "@/providers/UserProvider";
+import { IWithdraw, IWithdrawRequest } from "@/types/withdraw.type";
 
 // Fake withdraw data
 const withdrawalRequests = [
@@ -45,38 +54,97 @@ const withdrawalRequests = [
 export default function WithdrawalsPage() {
   const { user } = useUser();
   const [showForm, setShowForm] = useState(false);
-  const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [withdrawals, setWithdrawals] = useState<IWithdraw[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+  console.log({ withdrawals });
 
   // Form state
-  const [formData, setFormData] = useState<ITransactionForm>({
+  const [formData, setFormData] = useState<IWithdrawRequest>({
     createdBy: user?._id as string,
     amount: 0,
-    paymentMethod: "bkash",
-    transactionId: "",
-    senderPhone: "",
+    method: "bkash",
     status: "pending",
-    transactionType: "deposit",
-    note: "",
+    accountNumber: "",
+    adminNote: "",
   });
 
   // Form submit method
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setShowForm(false);
-    setAmount("");
+
+    try {
+      setSubmitting(true);
+      const res = await fetch("/api/member/withdraw", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ ...formData, createdBy: user?._id as string }),
+      });
+
+      if (res.ok) {
+        setMessage(
+          "Withdraw request submitted successfully! Waiting for manager verification."
+        );
+        setFormData({
+          createdBy: user?._id as string,
+          amount: 0,
+          method: "bkash",
+          accountNumber: "",
+          status: "pending",
+          adminNote: "",
+        });
+        setShowForm(false);
+        fetchWithdrawals();
+      } else {
+        const data = await res.json();
+        setError(data.error || "Failed to create withdraw");
+      }
+    } catch (err) {
+      setError("An error occurred");
+      console.error("Submit error:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchWithdrawals();
+  }, []);
+
+  const fetchWithdrawals = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/member/withdraw", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setWithdrawals(data.withdrawals);
+      }
+    } catch (err) {
+      console.error("Fetch withdrawals error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Icon status
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "Completed":
-        return <CheckCircle className="text-green-600" size={20} />;
+        return <CheckCircle className="text-green-600" size={16} />;
       case "Pending":
-        return <Clock className="text-yellow-600" size={20} />;
+        return <Clock className="text-yellow-600" size={16} />;
       case "Approved":
-        return <CheckCircle className="text-blue-600" size={20} />;
+        return <CheckCircle className="text-blue-600" size={16} />;
       default:
-        return <AlertCircle className="text-red-600" size={20} />;
+        return <AlertCircle className="text-red-600" size={16} />;
     }
   };
 
@@ -158,7 +226,7 @@ export default function WithdrawalsPage() {
                   <Input
                     type="number"
                     placeholder="Enter amount"
-                    value={amount}
+                    value={formData?.amount}
                     onChange={(e) =>
                       setFormData((prev) => ({
                         ...prev,
@@ -180,11 +248,11 @@ export default function WithdrawalsPage() {
                     </label>
 
                     <Select
-                      value={formData.paymentMethod}
+                      value={formData.method}
                       onValueChange={(value) =>
                         setFormData({
                           ...formData,
-                          paymentMethod: value as ITransactionMethod,
+                          method: value as ITransactionMethod,
                         })
                       }
                     >
@@ -199,22 +267,24 @@ export default function WithdrawalsPage() {
                     </Select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Receive number
-                    </label>
-                    <Input
-                      placeholder={`Enter your ${formData?.paymentMethod} number`}
-                      className=""
-                      value={amount}
-                      onChange={(e) =>
-                        setFormData((prev) => ({
-                          ...prev,
-                          transactionId: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
+                  {formData?.method !== "HandCash" && (
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Receive number
+                      </label>
+                      <Input
+                        placeholder={`Enter your ${formData?.method} number`}
+                        className=""
+                        value={formData?.accountNumber}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            accountNumber: e.target.value,
+                          }))
+                        }
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700">
@@ -240,8 +310,10 @@ export default function WithdrawalsPage() {
                   </Button>
                   <Button
                     type="submit"
+                    disabled={submitting}
                     className="flex-1 bg-primary hover:bg-primary/90"
                   >
+                    {submitting && <LoaderCircle className="animate-spin" />}
                     Submit Request
                   </Button>
                 </div>
@@ -261,6 +333,7 @@ export default function WithdrawalsPage() {
                 <Download size={16} /> Export
               </Button>
             </div>
+
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -269,11 +342,15 @@ export default function WithdrawalsPage() {
                       Amount
                     </th>
                     <th className="text-left py-3 font-medium text-muted-foreground">
+                      Account
+                    </th>
+                    <th className="text-left py-3 font-medium text-muted-foreground">
                       Request Date
                     </th>
                     <th className="text-left py-3 font-medium text-muted-foreground">
                       Processed Date
                     </th>
+
                     <th className="text-left py-3 font-medium text-muted-foreground">
                       Status
                     </th>
@@ -283,21 +360,28 @@ export default function WithdrawalsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {withdrawalRequests.map((req) => (
+                  {withdrawals.map((req) => (
                     <tr
-                      key={req.id}
+                      key={req._id}
                       className="border-b hover:bg-muted/50 transition"
                     >
                       <td className="py-4 font-semibold">৳ {req.amount}</td>
                       <td className="py-4 text-muted-foreground">
-                        {req.requestDate}
+                        <p className="">{req?.accountNumber}</p>
+                        <p className="uppercase text-xs">{req?.method}</p>
                       </td>
-                      <td className="py-4 text-muted-foreground">{req.date}</td>
+                      <td className="py-4 text-muted-foreground">
+                        {format(new Date(req.createdAt), "MMM dd, yyyy")}
+                      </td>
+                      <td className="py-4 text-muted-foreground">
+                        {format(new Date(req.updatedAt), "MMM dd, yyyy")}
+                      </td>
+
                       <td className="py-4">
                         <div className="flex items-center gap-2">
                           {getStatusIcon(req.status)}
                           <span
-                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusBg(
+                            className={`inline-block uppercase px-3 py-1 rounded-full text-xs font-medium ${getStatusBg(
                               req.status
                             )}`}
                           >
@@ -315,6 +399,7 @@ export default function WithdrawalsPage() {
                 </tbody>
               </table>
             </div>
+            {loading && <div>Data Loading... </div>}
           </Card>
         </div>
       </UserContainer>

@@ -7,10 +7,12 @@ const depositSchema = new Schema(
     amount: { type: Number, required: true, },
     paymentMethod: {
         type: String,
-        enum: ['bkash',"nagad" , "hand cash"],
+        enum: ['bkash',"nagad" , "HandCash"],
         default: 'bkash'
     },
+    depositNumber: String,
     transactionId: String,
+    note: String,
     status: {
         type: String,
         enum: ["pending" , "approved" , "rejected"],

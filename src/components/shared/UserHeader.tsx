@@ -29,7 +29,7 @@ import ProfileDropdown from "./ProfileDropdown";
 const memberNavItems = [
   { label: "Dashboard", href: "/dashboard", icon: Home },
   { label: "Deposits", href: "/dashboard/deposits", icon: CreditCard },
-  { label: "Investments", href: "/dashboard/investments", icon: TrendingUp },
+  // { label: "Investments", href: "/dashboard/investments", icon: TrendingUp },
   { label: "Withdrawals", href: "/dashboard/withdrawals", icon: LogOut },
   // { label: "Notifications", href: "/dashboard/notifications", icon: Bell },
   // { label: "Profile", href: "/dashboard/profile", icon: User },

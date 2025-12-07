@@ -38,6 +38,11 @@ const items = [
     icon: Currency,
   },
   {
+    title: "Withdraw Requests",
+    url: "/admin/withdraw",
+    icon: Currency,
+  },
+  {
     title: "Members",
     url: "/admin/members",
     icon: Users,

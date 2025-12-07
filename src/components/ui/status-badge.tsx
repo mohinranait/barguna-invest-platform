@@ -46,7 +46,7 @@ export function StatusBadge({
   return (
     <span
       className={cn(
-        "inline-block font-medium rounded-full",
+        "inline-block font-medium rounded-full capitalize",
         statusMap[status],
         sizeMap[size]
       )}

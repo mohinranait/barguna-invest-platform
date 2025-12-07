@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import LogoutButton from "../LogoutButton";
-import { LayoutDashboard, LogOut, User } from "lucide-react";
+import { History, LayoutDashboard, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@/providers/UserProvider";
 import { Skeleton } from "../ui/skeleton";
@@ -23,9 +23,9 @@ const ProfileDropdown = () => {
         {userLoading ? (
           <Skeleton className="w-24 h-6 rounded-md" />
         ) : (
-          <span className="inline-flex items-center gap-1">
+          <div className="inline-flex cursor-pointer  items-center gap-1">
             <User /> {user?.fullName}
-          </span>
+          </div>
         )}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -39,6 +39,11 @@ const ProfileDropdown = () => {
         <Link href={"/dashboard/profile"}>
           <DropdownMenuItem>
             <User /> Profile
+          </DropdownMenuItem>
+        </Link>
+        <Link href={"/dashboard/transactions"}>
+          <DropdownMenuItem>
+            <History /> Transactions History
           </DropdownMenuItem>
         </Link>
 

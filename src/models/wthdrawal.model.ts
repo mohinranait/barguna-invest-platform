@@ -7,7 +7,7 @@ const withdrawalSchema = new Schema(
     amount: { type: Number, required: true, },
     method: {
         type: String,
-        enum: ['bkash',"nagad" , "hand cash"],
+        enum: ['bkash',"nagad" , "HandCash"],
         default: 'bkash'
     },
     status: {
