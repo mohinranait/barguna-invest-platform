@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
-import { compareAsc, format } from "date-fns";
+import { format } from "date-fns";
 import {
   Select,
   SelectContent,
@@ -26,31 +26,6 @@ import { ITransactionMethod } from "@/types/transaction.type";
 import { useUser } from "@/providers/UserProvider";
 import { IWithdraw, IWithdrawRequest } from "@/types/withdraw.type";
 
-// Fake withdraw data
-const withdrawalRequests = [
-  {
-    id: 1,
-    amount: "5,000",
-    date: "Nov 28, 2024",
-    status: "Pending",
-    requestDate: "Nov 28",
-  },
-  {
-    id: 2,
-    amount: "3,000",
-    date: "Nov 15, 2024",
-    status: "Approved",
-    requestDate: "Nov 14",
-  },
-  {
-    id: 3,
-    amount: "2,500",
-    date: "Nov 1, 2024",
-    status: "Completed",
-    requestDate: "Oct 31",
-  },
-];
-
 export default function WithdrawalsPage() {
   const { user } = useUser();
   const [showForm, setShowForm] = useState(false);
@@ -59,7 +34,6 @@ export default function WithdrawalsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  console.log({ withdrawals });
 
   // Form state
   const [formData, setFormData] = useState<IWithdrawRequest>({
