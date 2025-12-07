@@ -25,6 +25,7 @@ import {
 import { ITransactionMethod } from "@/types/transaction.type";
 import { useUser } from "@/providers/UserProvider";
 import { IWithdraw, IWithdrawRequest } from "@/types/withdraw.type";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function WithdrawalsPage() {
   const { user } = useUser();
@@ -193,6 +194,20 @@ export default function WithdrawalsPage() {
             <Card className="p-6 bg-primary/5 border-primary/20">
               <h2 className="text-xl font-semibold ">New Withdrawal Request</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
+                {error && (
+                  <Alert className="border-red-200 bg-red-50">
+                    <AlertDescription className="text-red-800">
+                      {error}
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {message && (
+                  <Alert className="border-green-200 bg-green-50">
+                    <AlertDescription className="text-green-800">
+                      {message}
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <div>
                   <label className="block text-sm font-medium mb-2">
                     Amount (BDT)
