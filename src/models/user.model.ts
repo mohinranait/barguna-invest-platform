@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema(
     withdrawAmount: { type: Number, default: 0 },
     profitEarned: { type: Number, default: 0 },
     balance: { type: Number, default: 0 },
+
     bankAccount: {
       accountName: String,
       accountNumber: String,
