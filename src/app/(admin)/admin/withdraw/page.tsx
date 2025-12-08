@@ -198,6 +198,7 @@ export default function WithdrawVerificationPage() {
           <TabsTrigger value="all">All Withdraws</TabsTrigger>
         </TabsList>
 
+        {/* pending withdraw */}
         <TabsContent value="pending" className="mt-6">
           {loading ? (
             <div className="flex justify-center py-12">
@@ -287,12 +288,14 @@ export default function WithdrawVerificationPage() {
           )}
         </TabsContent>
 
+        {/* All withdraw */}
         <TabsContent value="all">
           <Card>
             <CardHeader>
               <CardTitle>All Withdraw History</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Withdraw table */}
               <Table>
                 <TableHeader>
                   <TableRow>
