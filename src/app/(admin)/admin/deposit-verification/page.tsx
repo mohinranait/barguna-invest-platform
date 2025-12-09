@@ -30,6 +30,7 @@ export default function DepositVerificationPage() {
     }
   }, [user]);
 
+  // Fetch deposit data from DB
   const fetchPendingDeposits = async () => {
     try {
       setLoading(true);
@@ -48,6 +49,7 @@ export default function DepositVerificationPage() {
     }
   };
 
+  // handle action
   const handleVerify = async (
     depositId: string,
     status: "approved" | "rejected"
@@ -107,9 +109,11 @@ export default function DepositVerificationPage() {
     }
   };
 
+  // Pending and total deposits amount
   const pendingCount = deposits.filter((d) => d.status === "pending").length;
   const totalAmount = deposits.reduce((sum, d) => sum + d.amount, 0);
 
+  // Check authenticated user role
   if (user?.role !== "manager" && user?.role !== "admin") {
     return (
       <div className="text-center py-8 text-gray-500">
