@@ -1,5 +1,7 @@
 import { connectDB } from "@/lib/db";
 import { isAuth } from "@/lib/helpers";
+import { Transaction } from "@/models/transaction.model";
+import { User } from "@/models/user.model";
 import { Withdrawal } from "@/models/wthdrawal.model";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -23,6 +25,31 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
         const body = await req.json()
         const withdraw = await Withdrawal.findByIdAndUpdate(withdrawId,{...body},{new:true, runValidators:true})
+        if ( !withdraw ) {
+            return NextResponse.json({ error: "not-found" }, { status: 404 })
+        }
+
+        if(body?.status === 'approved'){
+            // find user for add account balance
+            const user = await User.findById(withdraw?.createdBy)
+            if ( !user ) {
+                return NextResponse.json({ error: "not-found" }, { status: 404 })
+            }
+            // incress balance and invested amount in deposit created user
+            await User.findByIdAndUpdate(user?._id, { 
+            withdrawAmount: user?.withdrawAmount + withdraw?.amount,
+            balance: user?.balance - withdraw?.amount,
+            },{new:true, runValidators:true});
+
+            // Create transaction
+            await Transaction.create({
+                createdBy: user?._id,
+                amount: withdraw?.amount,
+                type: "withdraw",
+                referenceId: withdraw?._id,
+            })
+        }
+
 
         return NextResponse.json(
             {

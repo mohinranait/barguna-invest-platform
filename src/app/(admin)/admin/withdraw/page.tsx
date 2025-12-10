@@ -115,20 +115,6 @@ export default function WithdrawVerificationPage() {
       if (res.ok) {
         setMessage(`Withdraw ${status} successfully!`);
         fetchWithdraws();
-
-        if (status === "approved") {
-          await fetch("/api/admin/transactions", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-            body: JSON.stringify({
-              createdBy: user?._id,
-              amount: data?.withdraw?.amount,
-              type: "withdraw",
-              referenceId: data?.withdraw?._id,
-            }),
-          });
-        }
       } else {
         setError(data.error || "Failed to process withdraw");
       }

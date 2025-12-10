@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db"
 import { isAuth } from "@/lib/helpers"
 import { Deposit } from "@/models/deposit.model"
+import { Transaction } from "@/models/transaction.model"
 import { User } from "@/models/user.model"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -26,21 +27,31 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
             return NextResponse.json({ error: "not-found" }, { status: 404 })
         }
 
-        // find user for add account balance
-        const user = await User.findById(deposit?.createdBy)
-        if ( !user ) {
-            return NextResponse.json({ error: "not-found" }, { status: 404 })
-        }
         
-        // incress balance and invested amount in deposit created user
-         await User.findByIdAndUpdate(user?._id, { 
-            
+        
+        if(body?.status === 'approved'){
+            // find user for add account balance
+            const user = await User.findById(deposit?.createdBy)
+            if ( !user ) {
+                return NextResponse.json({ error: "not-found" }, { status: 404 })
+            }
+            // incress balance and invested amount in deposit created user
+            await User.findByIdAndUpdate(user?._id, { 
             investedAmount: user?.investedAmount + deposit?.amount,
             balance: user?.balance + deposit?.amount,
-           },{new:true, runValidators:true});
+            },{new:true, runValidators:true});
+
+            // Create transaction
+            await Transaction.create({
+                createdBy: user?._id,
+                amount: deposit?.amount,
+                type: "deposit",
+                referenceId: deposit?._id,
+            })
+        }
     
            
-        return NextResponse.json(
+        return NextResponse.json( 
             {
                 deposit
             },
