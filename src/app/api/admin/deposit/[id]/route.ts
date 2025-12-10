@@ -29,17 +29,17 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
         
         
-        if(body?.status === 'approved'){
-            // find user for add account balance
-            const user = await User.findById(deposit?.createdBy)
-            if ( !user ) {
+        if(body?.status === 'approved'){           
+            // incress balance and invested amount in deposit created user
+            const user = await User.findByIdAndUpdate(deposit?.createdBy , {
+               $inc: {
+                    balance: deposit?.amount,
+                    investedAmount: deposit?.amount
+               }
+            },{new:true, runValidators:true});
+             if ( !user ) {
                 return NextResponse.json({ error: "not-found" }, { status: 404 })
             }
-            // incress balance and invested amount in deposit created user
-            await User.findByIdAndUpdate(user?._id, { 
-            investedAmount: user?.investedAmount + deposit?.amount,
-            balance: user?.balance + deposit?.amount,
-            },{new:true, runValidators:true});
 
             // Create transaction
             await Transaction.create({

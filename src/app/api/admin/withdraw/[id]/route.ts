@@ -13,7 +13,6 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
         const withdrawId = params.id;
        
-
         const authUser = await isAuth()
         if (!authUser || authUser?.userId === "") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -29,17 +28,18 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
             return NextResponse.json({ error: "not-found" }, { status: 404 })
         }
 
-        if(body?.status === 'approved'){
-            // find user for add account balance
-            const user = await User.findById(withdraw?.createdBy)
+        if(body?.status === 'approved'){           
+            // incress balance and invested amount in deposit created user
+            const user = await User.findByIdAndUpdate(withdraw?.createdBy, {
+                $inc: {
+                   withdrawAmount:  withdraw?.amount,
+                   balance: -withdraw?.amount
+                }
+            },{new:true, runValidators:true})
             if ( !user ) {
                 return NextResponse.json({ error: "not-found" }, { status: 404 })
             }
-            // incress balance and invested amount in deposit created user
-            await User.findByIdAndUpdate(user?._id, { 
-            withdrawAmount: user?.withdrawAmount + withdraw?.amount,
-            balance: user?.balance - withdraw?.amount,
-            },{new:true, runValidators:true});
+
 
             // Create transaction
             await Transaction.create({
