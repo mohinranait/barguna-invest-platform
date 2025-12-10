@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db"
 import { isAuth } from "@/lib/helpers"
 import { Deposit } from "@/models/deposit.model"
+import { User } from "@/models/user.model"
 import { NextRequest, NextResponse } from "next/server"
 
 // Update deposit request for admin approval
@@ -9,7 +10,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
         await connectDB()
 
-        const transId = params.id;
+        const depositId = params.id;
         const authUser = await isAuth()
         if (!authUser || authUser?.userId === "") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -20,8 +21,25 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         }
 
         const body = await req.json()
-        const deposit = await Deposit.findByIdAndUpdate(transId,{...body},{new:true, runValidators:true})
+        const deposit = await Deposit.findByIdAndUpdate(depositId,{...body, updatedBy: authUser?.userId },{new:true, runValidators:true})
+        if ( !deposit ) {
+            return NextResponse.json({ error: "not-found" }, { status: 404 })
+        }
 
+        // find user for add account balance
+        const user = await User.findById(deposit?.createdBy)
+        if ( !user ) {
+            return NextResponse.json({ error: "not-found" }, { status: 404 })
+        }
+        
+        // incress balance and invested amount in deposit created user
+         await User.findByIdAndUpdate(user?._id, { 
+            
+            investedAmount: user?.investedAmount + deposit?.amount,
+            balance: user?.balance + deposit?.amount,
+           },{new:true, runValidators:true});
+    
+           
         return NextResponse.json(
             {
                 deposit

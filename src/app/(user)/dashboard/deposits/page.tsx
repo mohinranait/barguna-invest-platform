@@ -55,7 +55,6 @@ export default function DepositsPage() {
   useEffect(() => {
     fetchDeposits();
   }, []);
-  console.log({ formData });
 
   const fetchDeposits = async () => {
     try {
@@ -66,8 +65,6 @@ export default function DepositsPage() {
       });
       if (res.ok) {
         const data = await res.json();
-        console.log({ resData: data });
-
         setDeposits(data.deposits);
       }
     } catch (err) {
