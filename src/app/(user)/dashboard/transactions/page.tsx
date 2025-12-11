@@ -4,29 +4,38 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Download } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
-
-const investments = [
-  {
-    id: 1,
-    date: "Dec 1, 2024",
-    amount: "10,000",
-    type: "Initial Deposit",
-    status: "Completed",
-  },
-  {
-    id: 2,
-    date: "Nov 15, 2024",
-    amount: "5,000",
-    type: "Additional Deposit",
-    status: "Completed",
-  },
-];
+import { ITransaction } from "@/types/transaction.type";
+import { format } from "date-fns";
 
 export default function InvestmentsPage() {
-  const [historys, setHistorys] = useState([]);
+  const [historys, setHistorys] = useState<ITransaction[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchHistorys();
+  }, []);
+
+  const fetchHistorys = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch("/api/member/transactions", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setHistorys(data.transactions);
+      }
+    } catch (err) {
+      console.error("Fetch transactions error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <React.Fragment>
       <UserContainer className="pt-4">
@@ -71,7 +80,7 @@ export default function InvestmentsPage() {
           </Card>
 
           {/* Table */}
-          <Card className="p-6">
+          <Card className="p-6 gap-4">
             <div className="flex items-center justify-between ">
               <h2 className="text-lg font-semibold">Transactions</h2>
               <Button
@@ -101,17 +110,19 @@ export default function InvestmentsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {investments.map((inv) => (
+                  {historys.map((inv) => (
                     <tr
-                      key={inv.id}
+                      key={inv._id}
                       className="border-b hover:bg-muted/50 transition"
                     >
-                      <td className="py-3 pl-3">{inv.date}</td>
+                      <td className="py-3 pl-3">
+                        {format(new Date(), "MMM ddd, yyyy")}
+                      </td>
                       <td className="py-3">{inv.type}</td>
                       <td className="py-3 font-semibold">৳ {inv.amount}</td>
                       <td className="py-3">
                         <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                          {inv.status}
+                          Completed
                         </span>
                       </td>
                     </tr>

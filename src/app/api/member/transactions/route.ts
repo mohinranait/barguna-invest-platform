@@ -14,9 +14,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    console.log({});
-    
-
     const query = {
         createdBy: authUser.userId
     }

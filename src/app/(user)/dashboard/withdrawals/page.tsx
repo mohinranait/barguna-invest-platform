@@ -137,6 +137,15 @@ export default function WithdrawalsPage() {
     }
   };
 
+  // pending withdrawal balance
+  const pendingAmount = withdrawals
+    ?.filter((item) => item.status === "pending")
+    .reduce((acc, item) => (acc += item?.amount), 0);
+  // Complate withdraw
+  const approvedAmount = withdrawals
+    ?.filter((item) => item.status === "approved")
+    .reduce((acc, item) => (acc += item?.amount), 0);
+
   return (
     <React.Fragment>
       <UserContainer className="pt-4 pb-8">
@@ -164,7 +173,7 @@ export default function WithdrawalsPage() {
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 Available Balance
               </div>
-              <div className="text-3xl font-bold">৳ 11,250</div>
+              <div className="text-3xl font-bold">৳ {user?.balance}</div>
               <div className="text-xs text-muted-foreground mt-2">
                 Can withdraw up to this amount
               </div>
@@ -173,16 +182,16 @@ export default function WithdrawalsPage() {
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 Pending Withdrawals
               </div>
-              <div className="text-3xl font-bold">৳ 5,000</div>
+              <div className="text-3xl font-bold">৳ {pendingAmount}</div>
               <div className="text-xs text-yellow-600 mt-2">
                 Awaiting approval
               </div>
             </Card>
             <Card className="p-6 gap-0">
               <div className="text-sm font-medium text-muted-foreground mb-2">
-                Completed This Month
+                Completed Withdrawals
               </div>
-              <div className="text-3xl font-bold">৳ 2,500</div>
+              <div className="text-3xl font-bold">৳ {approvedAmount}</div>
               <div className="text-xs text-green-600 mt-2">
                 Successfully withdrawn
               </div>

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import StatCard from "@/components/ui/stat-card";
 import StatusBadge from "@/components/ui/status-badge";
+import { useUser } from "@/providers/UserProvider";
 import { Plus, TrendingDown, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import React, { useState } from "react";
@@ -30,7 +31,10 @@ interface Transaction {
 }
 
 const UserDashboard = () => {
-  const user: { profitEarned: number } = { profitEarned: 1000 }; // Replace with actual user data fetching logic
+  // const user: { profitEarned: number } = { profitEarned: 1000 };
+  const { user } = useUser();
+  console.log({ user });
+
   const [transactions] = useState<Transaction[]>([]);
   const profitData = [
     { month: "Jan", profit: user?.profitEarned ? user.profitEarned * 0.3 : 0 },
@@ -46,7 +50,7 @@ const UserDashboard = () => {
       <div className="bg-green-100 pt-4 pb-6 ">
         <UserContainer>
           <UserHeader />
-          <div className="flex items-center pt-4 justify-between">
+          <div className="flex items-center flex-wrap gap-3 pt-4 justify-between">
             <div>
               <h1 className="text-3xl font-bold">Welcome Back, Mahir</h1>
               <p className="text-muted-foreground">
@@ -60,24 +64,26 @@ const UserDashboard = () => {
             </Link>
           </div>
           {/* KPI Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 pt-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 pt-4 gap-4 lg:gap-6">
+            <StatCard
+              icon={<TrendingUp className="text-primary" size={24} />}
+              label="Current Balance"
+              value={`৳ ${user?.balance.toLocaleString()}`}
+            />
+
             <StatCard
               icon={<TrendingDown className="text-primary" size={24} />}
               label="Total Invested"
-              value={`৳ ${(1000).toLocaleString()}`}
+              value={`৳ ${user?.investedAmount.toLocaleString()}`}
             />
             <StatCard
               icon={<TrendingUp className="text-primary" size={24} />}
               label="Total Profit Earned"
-              value={`৳ ${(200).toLocaleString()}`}
+              value={`৳ ${user?.profitEarned.toLocaleString()}`}
               change="+12.5%"
               changeType="positive"
             />
-            <StatCard
-              icon={<TrendingUp className="text-primary" size={24} />}
-              label="Current Balance"
-              value={`৳ ${(100).toLocaleString()}`}
-            />
+
             <StatCard
               icon={<TrendingUp className="text-primary" size={24} />}
               label="Pool Share"
