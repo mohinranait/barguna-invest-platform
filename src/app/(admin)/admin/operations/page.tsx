@@ -111,6 +111,27 @@ export default function OperationsPage() {
     }
   };
 
+  // Handle distributed from table action button
+  const handleDistributed = async (op: ICompanyProfit) => {
+    try {
+      setSubmitting(true);
+      await fetch(`/api/admin/company-profit/${op?._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ distributed: true }),
+      });
+    } catch (err) {
+      setError("An error occurred");
+      console.error("Submit error:", err);
+    } finally {
+      setSubmitting(false);
+      fetchProfits();
+    }
+  };
+
   return (
     <div className="p-6 md:p-8 space-y-6">
       {/* Header */}
@@ -331,6 +352,8 @@ export default function OperationsPage() {
                         size={"sm"}
                         className="text-xs"
                         disabled={op.distributed}
+                        onClick={() => handleDistributed(op)}
+                        type="button"
                       >
                         Distribut
                       </Button>
