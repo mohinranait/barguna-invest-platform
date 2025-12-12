@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db"
 import { isAuth } from "@/lib/helpers"
+import { User } from "@/models/user.model"
 import { Withdrawal } from "@/models/wthdrawal.model"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -14,7 +15,14 @@ export async function POST(req:NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
         }
 
+        // Checked balance
+        const user = await User.findById(authUser?.userId);
         const body = await req.json()
+        if( user?.balance < body?.amount ){
+           return NextResponse.json({ error: "Insufficient balance" }, { status: 403 })
+        }
+
+
         const newWithdraw = await Withdrawal.create({...body})
 
         return NextResponse.json(

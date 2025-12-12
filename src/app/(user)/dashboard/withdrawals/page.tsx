@@ -22,9 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ITransactionMethod } from "@/types/transaction.type";
+
 import { useUser } from "@/providers/UserProvider";
-import { IWithdraw, IWithdrawRequest } from "@/types/withdraw.type";
+import {
+  IWithdraw,
+  IWithdrawMethod,
+  IWithdrawRequest,
+} from "@/types/withdraw.type";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function WithdrawalsPage() {
@@ -49,6 +53,16 @@ export default function WithdrawalsPage() {
   // Form submit method
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!user) {
+      setError("Login first");
+      return;
+    }
+
+    if (user?.balance < formData?.amount) {
+      setError("Insufficient balance");
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -235,7 +249,7 @@ export default function WithdrawalsPage() {
                     className=""
                   />
                   <p className="text-xs text-muted-foreground mt-2">
-                    Maximum: ৳ 11,250
+                    Maximum: ৳ {user?.balance}
                   </p>
                 </div>
 
@@ -250,7 +264,7 @@ export default function WithdrawalsPage() {
                       onValueChange={(value) =>
                         setFormData({
                           ...formData,
-                          method: value as ITransactionMethod,
+                          method: value as IWithdrawMethod,
                         })
                       }
                     >
