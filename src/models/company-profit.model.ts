@@ -9,6 +9,10 @@ const companyProfit = new Schema(
         enum: ['increase',"decrease"],
         default: 'increase'
     },
+    distributed: {
+      type: Boolean,
+      default:false,
+    },
     note: {
         type: String,
     },
