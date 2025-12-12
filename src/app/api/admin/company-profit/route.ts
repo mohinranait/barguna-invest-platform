@@ -28,8 +28,6 @@ export async function POST(req:NextRequest) {
         if ( !profit ) {
             return NextResponse.json({ error: "Not created" }, { status: 401 })
         }
-
-        
         
         if(body?.distributed){
            
@@ -45,8 +43,6 @@ export async function POST(req:NextRequest) {
             if (totalInvested <= 0) {
                 return NextResponse.json({ error: "Invalid total invested" }, { status: 400 });
             }
-
-
 
             const userOps : AnyBulkWriteOperation[]  = [];
             const profitOps : AnyBulkWriteOperation[]  = [];
@@ -66,8 +62,8 @@ export async function POST(req:NextRequest) {
                         filter: {_id: user?._id },
                         update: {
                             $inc: {
-                                profitEarned: userProfit ,
-                                balance: userProfit 
+                                profitEarned: profit?.type === 'increase' ?  userProfit: -userProfit ,
+                                balance: profit?.type === 'increase' ?  userProfit: -userProfit 
                             }
                         }
                     }

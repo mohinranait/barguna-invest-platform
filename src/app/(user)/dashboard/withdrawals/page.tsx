@@ -31,6 +31,15 @@ import {
 } from "@/types/withdraw.type";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+
 export default function WithdrawalsPage() {
   const { user } = useUser();
   const [showForm, setShowForm] = useState(false);
@@ -137,7 +146,7 @@ export default function WithdrawalsPage() {
     }
   };
 
-  // Status badge
+  // Status badge color
   const getStatusBg = (status: string) => {
     switch (status) {
       case "Completed":
@@ -154,17 +163,18 @@ export default function WithdrawalsPage() {
   // pending withdrawal balance
   const pendingAmount = withdrawals
     ?.filter((item) => item.status === "pending")
-    .reduce((acc, item) => (acc += item?.amount), 0);
-  // Complate withdraw
+    .reduce((acc, item) => (acc += item.amount), 0);
+
+  // complete withdraw
   const approvedAmount = withdrawals
     ?.filter((item) => item.status === "approved")
-    .reduce((acc, item) => (acc += item?.amount), 0);
+    .reduce((acc, item) => (acc += item.amount), 0);
 
   return (
     <React.Fragment>
       <UserContainer className="pt-4 pb-8">
         <UserHeader />
-        <div className=" pt-4 space-y-5">
+        <div className="pt-4 space-y-5">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
@@ -173,12 +183,142 @@ export default function WithdrawalsPage() {
                 Manage your withdrawal requests and track status
               </p>
             </div>
-            <Button
-              className="bg-primary hover:bg-primary/90 gap-2"
-              onClick={() => setShowForm(!showForm)}
-            >
-              <Plus size={20} /> Request Withdrawal
-            </Button>
+
+            {/* Withdrawal Modal Trigger */}
+            <Dialog open={showForm} onOpenChange={setShowForm}>
+              <DialogTrigger asChild>
+                <Button className="bg-primary hover:bg-primary/90 gap-2">
+                  <Plus size={20} /> Request Withdrawal
+                </Button>
+              </DialogTrigger>
+
+              {/* Modal Form */}
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>New Withdrawal Request</DialogTitle>
+                </DialogHeader>
+
+                <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+                  {error && (
+                    <Alert className="border-red-200 bg-red-50">
+                      <AlertDescription className="text-red-800">
+                        {error}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {message && (
+                    <Alert className="border-green-200 bg-green-50">
+                      <AlertDescription className="text-green-800">
+                        {message}
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Amount */}
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Amount (BDT)
+                    </label>
+                    <Input
+                      type="number"
+                      placeholder="Enter amount"
+                      value={formData.amount}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          amount: Number(e.target.value),
+                        }))
+                      }
+                      required
+                    />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Maximum: ৳ {user?.balance}
+                    </p>
+                  </div>
+
+                  {/* Method + Number */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Withdrawal Method
+                      </label>
+
+                      <Select
+                        value={formData.method}
+                        onValueChange={(value) =>
+                          setFormData({
+                            ...formData,
+                            method: value as IWithdrawMethod,
+                          })
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="bkash">bKash</SelectItem>
+                          <SelectItem value="nagad">Nagad</SelectItem>
+                          <SelectItem value="HandCash">Hand Cash</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {formData.method !== "HandCash" && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2">
+                          Receive number
+                        </label>
+                        <Input
+                          placeholder={`Enter your ${formData.method} number`}
+                          value={formData.accountNumber}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              accountNumber: e.target.value,
+                            }))
+                          }
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info box */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700">
+                    <p className="font-medium mb-2">Processing Information:</p>
+                    <ul className="space-y-1 text-xs">
+                      <li>
+                        • Withdrawal requests are processed within 2-3 business
+                        days
+                      </li>
+                      <li>• Admin review and verification required</li>
+                      <li>• Bank transfer fees may apply</li>
+                    </ul>
+                  </div>
+
+                  {/* Buttons */}
+                  <DialogFooter className="flex gap-3 justify-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={submitting}
+                      className="bg-primary"
+                    >
+                      {submitting && (
+                        <LoaderCircle className="animate-spin mr-1" />
+                      )}
+                      Submit Request
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Balance Summary */}
@@ -192,6 +332,7 @@ export default function WithdrawalsPage() {
                 Can withdraw up to this amount
               </div>
             </Card>
+
             <Card className="p-6 gap-0">
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 Pending Withdrawals
@@ -201,6 +342,7 @@ export default function WithdrawalsPage() {
                 Awaiting approval
               </div>
             </Card>
+
             <Card className="p-6 gap-0">
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 Completed Withdrawals
@@ -212,136 +354,11 @@ export default function WithdrawalsPage() {
             </Card>
           </div>
 
-          {/* Withdrawal Form */}
-          {showForm && (
-            <Card className="p-6 bg-primary/5 border-primary/20">
-              <h2 className="text-xl font-semibold ">New Withdrawal Request</h2>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <Alert className="border-red-200 bg-red-50">
-                    <AlertDescription className="text-red-800">
-                      {error}
-                    </AlertDescription>
-                  </Alert>
-                )}
-                {message && (
-                  <Alert className="border-green-200 bg-green-50">
-                    <AlertDescription className="text-green-800">
-                      {message}
-                    </AlertDescription>
-                  </Alert>
-                )}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Amount (BDT)
-                  </label>
-                  <Input
-                    type="number"
-                    placeholder="Enter amount"
-                    value={formData?.amount}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        amount: Number(e.target.value),
-                      }))
-                    }
-                    required
-                    className=""
-                  />
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Maximum: ৳ {user?.balance}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Withdrawal Method
-                    </label>
-
-                    <Select
-                      value={formData.method}
-                      onValueChange={(value) =>
-                        setFormData({
-                          ...formData,
-                          method: value as IWithdrawMethod,
-                        })
-                      }
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="bkash">bKash</SelectItem>
-                        <SelectItem value="nagad">Nagad</SelectItem>
-                        <SelectItem value="HandCash">Hand Cash</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {formData?.method !== "HandCash" && (
-                    <div>
-                      <label className="block text-sm font-medium mb-2">
-                        Receive number
-                      </label>
-                      <Input
-                        placeholder={`Enter your ${formData?.method} number`}
-                        className=""
-                        value={formData?.accountNumber}
-                        onChange={(e) =>
-                          setFormData((prev) => ({
-                            ...prev,
-                            accountNumber: e.target.value,
-                          }))
-                        }
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-700">
-                  <p className="font-medium mb-2">Processing Information:</p>
-                  <ul className="space-y-1 text-xs">
-                    <li>
-                      • Withdrawal requests are processed within 2-3 business
-                      days
-                    </li>
-                    <li>• Admin review and verification required</li>
-                    <li>• Bank transfer fees may apply</li>
-                  </ul>
-                </div>
-
-                <div className="flex gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="flex-1 bg-transparent"
-                    onClick={() => setShowForm(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    disabled={submitting}
-                    className="flex-1 bg-primary hover:bg-primary/90"
-                  >
-                    {submitting && <LoaderCircle className="animate-spin" />}
-                    Submit Request
-                  </Button>
-                </div>
-              </form>
-            </Card>
-          )}
-
           {/* Withdrawal History */}
           <Card className="p-6">
-            <div className="flex items-center justify-between ">
+            <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Withdrawal History</h2>
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-2 bg-transparent"
-              >
+              <Button variant="outline" size="sm" className="gap-2">
                 <Download size={16} /> Export
               </Button>
             </div>
@@ -378,13 +395,16 @@ export default function WithdrawalsPage() {
                       className="border-b hover:bg-muted/50 transition"
                     >
                       <td className="py-4 font-semibold">৳ {req.amount}</td>
+
                       <td className="py-4 text-muted-foreground">
-                        <p className="">{req?.accountNumber}</p>
-                        <p className="uppercase text-xs">{req?.method}</p>
+                        <p>{req.accountNumber}</p>
+                        <p className="uppercase text-xs">{req.method}</p>
                       </td>
+
                       <td className="py-4 text-muted-foreground">
                         {format(new Date(req.createdAt), "MMM dd, yyyy")}
                       </td>
+
                       <td className="py-4 text-muted-foreground">
                         {format(new Date(req.updatedAt), "MMM dd, yyyy")}
                       </td>
@@ -401,6 +421,7 @@ export default function WithdrawalsPage() {
                           </span>
                         </div>
                       </td>
+
                       <td className="py-4">
                         <Button variant="ghost" size="sm">
                           View
@@ -411,7 +432,8 @@ export default function WithdrawalsPage() {
                 </tbody>
               </table>
             </div>
-            {loading && <div>Data Loading... </div>}
+
+            {loading && <div>Data Loading...</div>}
           </Card>
         </div>
       </UserContainer>

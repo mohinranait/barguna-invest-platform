@@ -47,15 +47,15 @@ const UserDashboard = () => {
 
   return (
     <React.Fragment>
-      <div className="bg-green-100 pt-4 pb-6 ">
+      <div className="bg-green-800 pt-4 pb-6 ">
         <UserContainer>
           <UserHeader />
           <div className="flex items-center flex-wrap gap-3 pt-4 justify-between">
             <div>
-              <h1 className="text-3xl font-bold">Welcome Back, Mahir</h1>
-              <p className="text-muted-foreground">
-                Here is your investment overview
-              </p>
+              <h1 className="text-3xl text-white font-bold">
+                Welcome Back, {user?.fullName}
+              </h1>
+              <p className="text-accent">Here is your investment overview</p>
             </div>
             <Link href="/dashboard/deposits">
               <Button className="bg-primary hover:bg-primary/90 gap-2">
