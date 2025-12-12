@@ -9,6 +9,7 @@ import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
 import { ITransaction } from "@/types/transaction.type";
 import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 export default function InvestmentsPage() {
   const [historys, setHistorys] = useState<ITransaction[]>([]);
@@ -118,8 +119,18 @@ export default function InvestmentsPage() {
                       <td className="py-3 pl-3">
                         {format(new Date(), "MMM ddd, yyyy")}
                       </td>
-                      <td className="py-3">{inv.type}</td>
-                      <td className="py-3 font-semibold">৳ {inv.amount}</td>
+                      <td className="py-3 capitalize">{inv.type}</td>
+                      <td
+                        className={cn(
+                          "py-3 font-semibold",
+                          inv.type === "deposit"
+                            ? "text-green-600"
+                            : "text-red-600"
+                        )}
+                      >
+                        {inv.type === "deposit" ? "+" : "-"}৳{" "}
+                        {inv.amount?.toLocaleString()}
+                      </td>
                       <td className="py-3">
                         <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
                           Completed

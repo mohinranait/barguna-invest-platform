@@ -135,28 +135,28 @@ export default function WithdrawalsPage() {
   // Icon status
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "Completed":
+      case "approved":
         return <CheckCircle className="text-green-600" size={16} />;
-      case "Pending":
+      case "pending":
         return <Clock className="text-yellow-600" size={16} />;
-      case "Approved":
-        return <CheckCircle className="text-blue-600" size={16} />;
-      default:
+      case "rejected":
         return <AlertCircle className="text-red-600" size={16} />;
+      default:
+        return <CheckCircle className="text-blue-600" size={16} />;
     }
   };
 
   // Status badge color
   const getStatusBg = (status: string) => {
     switch (status) {
-      case "Completed":
+      case "approved":
         return "bg-green-100 text-green-700";
-      case "Pending":
+      case "pending":
         return "bg-yellow-100 text-yellow-700";
-      case "Approved":
-        return "bg-blue-100 text-blue-700";
-      default:
+      case "rejected":
         return "bg-red-100 text-red-700";
+      default:
+        return "bg-blue-100 text-blue-700";
     }
   };
 
@@ -327,7 +327,9 @@ export default function WithdrawalsPage() {
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 Available Balance
               </div>
-              <div className="text-3xl font-bold">৳ {user?.balance}</div>
+              <div className="text-3xl font-bold">
+                ৳ {user?.balance?.toLocaleString()}
+              </div>
               <div className="text-xs text-muted-foreground mt-2">
                 Can withdraw up to this amount
               </div>
@@ -337,7 +339,9 @@ export default function WithdrawalsPage() {
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 Pending Withdrawals
               </div>
-              <div className="text-3xl font-bold">৳ {pendingAmount}</div>
+              <div className="text-3xl font-bold">
+                ৳ {pendingAmount?.toLocaleString()}
+              </div>
               <div className="text-xs text-yellow-600 mt-2">
                 Awaiting approval
               </div>
@@ -347,7 +351,9 @@ export default function WithdrawalsPage() {
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 Completed Withdrawals
               </div>
-              <div className="text-3xl font-bold">৳ {approvedAmount}</div>
+              <div className="text-3xl font-bold">
+                ৳ {approvedAmount?.toLocaleString()}
+              </div>
               <div className="text-xs text-green-600 mt-2">
                 Successfully withdrawn
               </div>
@@ -394,7 +400,9 @@ export default function WithdrawalsPage() {
                       key={req._id}
                       className="border-b hover:bg-muted/50 transition"
                     >
-                      <td className="py-4 font-semibold">৳ {req.amount}</td>
+                      <td className="py-4 font-semibold">
+                        ৳ {req.amount?.toLocaleString()}
+                      </td>
 
                       <td className="py-4 text-muted-foreground">
                         <p>{req.accountNumber}</p>
@@ -411,12 +419,12 @@ export default function WithdrawalsPage() {
 
                       <td className="py-4">
                         <div className="flex items-center gap-2">
-                          {getStatusIcon(req.status)}
                           <span
-                            className={`inline-block uppercase px-3 py-1 rounded-full text-xs font-medium ${getStatusBg(
+                            className={`inline-flex gap-1 items-center uppercase px-3 py-1 rounded-full text-xs font-medium ${getStatusBg(
                               req.status
                             )}`}
                           >
+                            {getStatusIcon(req.status)}
                             {req.status}
                           </span>
                         </div>
