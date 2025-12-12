@@ -3,13 +3,7 @@
 import type React from "react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -19,13 +13,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import StatCard from "@/components/ui/stat-card";
 import StatusBadge from "@/components/ui/status-badge";
 import LoadingSpinner from "@/components/ui/loading-spinner";
-
-import { CreditCard } from "lucide-react";
+import { Plus, TrendingUp, TrendingUpDown } from "lucide-react";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
 import { useUser } from "@/providers/UserProvider";
@@ -35,12 +27,25 @@ import {
   TDepositMethod,
 } from "@/types/deposit.type";
 
+// Modal imports
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { format } from "date-fns";
+
 export default function DepositsPage() {
   const { user } = useUser();
+  const [openModal, setOpenModal] = useState(false);
 
   const [deposits, setDeposits] = useState<IDeposit[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
   const [formData, setFormData] = useState<IDepositRequest>({
     createdBy: user?._id as string,
     amount: 0,
@@ -49,7 +54,7 @@ export default function DepositsPage() {
     status: "pending",
     depositNumber: "",
   });
-  const [message, setMessage] = useState("");
+
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -63,6 +68,7 @@ export default function DepositsPage() {
         method: "GET",
         credentials: "include",
       });
+
       if (res.ok) {
         const data = await res.json();
         setDeposits(data.deposits);
@@ -77,7 +83,6 @@ export default function DepositsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    setMessage("");
 
     if (
       !formData.amount ||
@@ -95,6 +100,7 @@ export default function DepositsPage() {
 
     try {
       setSubmitting(true);
+
       const res = await fetch("/api/member/deposit", {
         method: "POST",
         headers: {
@@ -105,10 +111,15 @@ export default function DepositsPage() {
       });
 
       if (res.ok) {
-        // const data = await res.json();
-        setMessage(
-          "Deposit request submitted successfully! Waiting for manager verification."
-        );
+        toast.success("Request successfull", {
+          description:
+            "Deposit request submitted successfully! Waiting for manager verification.",
+          action: {
+            label: "Undo",
+            onClick: () => console.log("Undo"),
+          },
+        });
+
         setFormData({
           createdBy: user?._id as string,
           amount: 0,
@@ -117,7 +128,9 @@ export default function DepositsPage() {
           depositNumber: "",
           status: "pending",
         });
+
         fetchDeposits();
+        setOpenModal(false);
       } else {
         const data = await res.json();
         setError(data.error || "Failed to create deposit");
@@ -139,188 +152,181 @@ export default function DepositsPage() {
     .reduce((sum, d) => sum + d.amount, 0);
 
   return (
-    <UserContainer className="space-y-5 pt-4 pb-6 ">
+    <UserContainer className="space-y-5 pt-4 pb-6">
       <UserHeader />
+
       {/* Stats */}
       <div className="grid gap-4 md:grid-cols-3">
         <StatCard
-          icon={<CreditCard className="text-primary" size={24} />}
+          icon={<TrendingUp className="text-primary" size={24} />}
           label="Total Deposited"
           value={`৳${totalDeposited.toLocaleString()}`}
         />
         <StatCard
-          icon={<CreditCard className="text-primary" size={24} />}
+          icon={<TrendingUpDown className="text-primary" size={24} />}
           label="Pending Requests"
           value={`৳${pendingAmount.toLocaleString()}`}
           highlight
         />
         <StatCard
-          icon={<CreditCard className="text-primary" size={24} />}
+          icon={<TrendingUpDown className="text-primary" size={24} />}
           label="Total Requests"
           value={deposits.length.toString()}
         />
       </div>
 
-      <Tabs defaultValue="new-deposit" className="w-full">
-        <TabsList>
-          <TabsTrigger value="new-deposit">New Deposit</TabsTrigger>
-          <TabsTrigger value="history">Deposit History</TabsTrigger>
-        </TabsList>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Deposit </h1>
+          <p className="text-muted-foreground ">
+            Manage your deposit requests and track status
+          </p>
+        </div>
 
-        <TabsContent value="new-deposit" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Request Deposit</CardTitle>
-              <CardDescription>
-                Send money via bKash or Nagad and enter transaction details
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <Alert className="border-red-200 bg-red-50">
-                    <AlertDescription className="text-red-800">
-                      {error}
-                    </AlertDescription>
-                  </Alert>
-                )}
-                {message && (
-                  <Alert className="border-green-200 bg-green-50">
-                    <AlertDescription className="text-green-800">
-                      {message}
-                    </AlertDescription>
-                  </Alert>
-                )}
+        <Dialog open={openModal} onOpenChange={setOpenModal}>
+          <DialogTrigger asChild>
+            <Button className="px-6">
+              <Plus /> New Deposit
+            </Button>
+          </DialogTrigger>
 
-                <div className="space-y-2">
-                  <Label htmlFor="amount">Amount (৳)</Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    placeholder="Enter amount"
-                    value={formData.amount}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        amount: Number(e.target.value),
-                      })
-                    }
-                    min="1000"
-                    step="100"
-                  />
+          {/* -------- Deposit Modal -------- */}
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Request Deposit</DialogTitle>
+            </DialogHeader>
+
+            <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+              {error && (
+                <Alert className="border-red-200 bg-red-50">
+                  <AlertDescription className="text-red-800">
+                    {error}
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              <div className="space-y-2">
+                <Label htmlFor="amount">Amount (৳)</Label>
+                <Input
+                  id="amount"
+                  type="number"
+                  placeholder="Enter amount"
+                  value={formData.amount}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      amount: Number(e.target.value),
+                    })
+                  }
+                  min="1000"
+                  step="100"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="method">Payment Method</Label>
+                <Select
+                  value={formData.paymentMethod}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      paymentMethod: value as TDepositMethod,
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="bkash">bKash</SelectItem>
+                    <SelectItem value="nagad">Nagad</SelectItem>
+                    <SelectItem value="HandCash">Hand Cash</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="880XXXXXXXXX"
+                  value={formData.depositNumber}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      depositNumber: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="txnId">Transaction ID / Reference</Label>
+                <Input
+                  id="txnId"
+                  placeholder="Enter transaction ID"
+                  value={formData.transactionId}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      transactionId: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <Button type="submit" disabled={submitting} className="w-full">
+                {submitting ? "Processing..." : "Submit Deposit Request"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      {loading ? (
+        <LoadingSpinner />
+      ) : deposits.length === 0 ? (
+        <Card className="text-center py-8">
+          <p className="text-gray-500">No deposits yet</p>
+        </Card>
+      ) : (
+        <div className="space-y-3">
+          {deposits.map((deposit) => (
+            <Card key={deposit._id}>
+              <CardContent>
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="font-semibold">
+                      ৳{deposit.amount.toLocaleString()}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      {deposit.paymentMethod.toUpperCase()} •{" "}
+                      {deposit.transactionId}
+                    </p>
+
+                    {deposit.status === "rejected" && (
+                      <p className="text-sm text-red-600 mt-2">
+                        Reason: {deposit.note}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="text-right">
+                    <StatusBadge status={deposit.status}>
+                      {deposit.status}
+                    </StatusBadge>
+
+                    <p className="text-xs text-gray-500 mt-2">
+                      {format(new Date(deposit.createdAt), "MMM dd, yyyy")}
+                    </p>
+                  </div>
                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="method">Payment Method</Label>
-                  <Select
-                    value={formData.paymentMethod}
-                    onValueChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        paymentMethod: value as TDepositMethod,
-                      })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="bkash">bKash</SelectItem>
-                      <SelectItem value="nagad">Nagad</SelectItem>
-                      <SelectItem value="HandCash">Hand Cash</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="880XXXXXXXXX"
-                    value={formData.depositNumber}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        depositNumber: e.target.value,
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="txnId">Transaction ID / Reference</Label>
-                  <Input
-                    id="txnId"
-                    placeholder="Enter transaction ID from bKash/Nagad"
-                    value={formData.transactionId}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        transactionId: e.target.value,
-                      })
-                    }
-                  />
-                  <p className="text-xs text-gray-500">
-                    Example: XXXXXXXXXXXX (from receipt)
-                  </p>
-                </div>
-
-                <Button type="submit" disabled={submitting} className="w-full">
-                  {submitting ? "Processing..." : "Submit Deposit Request"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="history" className="space-y-4">
-          {loading ? (
-            <LoadingSpinner />
-          ) : deposits.length === 0 ? (
-            <Card className="text-center py-8">
-              <p className="text-gray-500">No deposits yet</p>
+              </CardContent>
             </Card>
-          ) : (
-            <div className="space-y-3">
-              {deposits.map((deposit) => (
-                <Card key={deposit._id} className="">
-                  <CardContent className="">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          <div>
-                            <p className="font-semibold">
-                              ৳{deposit.amount.toLocaleString()}
-                            </p>
-                            <p className="text-sm text-gray-600">
-                              {deposit.paymentMethod.toUpperCase()} •{" "}
-                              {deposit.transactionId}
-                            </p>
-                          </div>
-                        </div>
-                        {deposit.status === "rejected" && (
-                          <p className="text-sm text-red-600 mt-2">
-                            Reason: {deposit.note}
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <StatusBadge status={deposit.status}>
-                          {deposit.status}
-                        </StatusBadge>
-                        <p className="text-xs text-gray-500 mt-2">
-                          {new Date(deposit.createdAt).toLocaleDateString()}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </TabsContent>
-      </Tabs>
+          ))}
+        </div>
+      )}
     </UserContainer>
   );
 }
