@@ -10,6 +10,7 @@ import UserHeader from "@/components/shared/UserHeader";
 import { ITransaction } from "@/types/transaction.type";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 export default function InvestmentsPage() {
   const [historys, setHistorys] = useState<ITransaction[]>([]);
@@ -92,55 +93,63 @@ export default function InvestmentsPage() {
                 <Download size={16} /> Export CSV
               </Button>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full border border-border text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 pl-3 font-medium text-muted-foreground">
-                      Date
-                    </th>
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Type
-                    </th>
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Amount
-                    </th>
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {historys.map((inv) => (
-                    <tr
-                      key={inv._id}
-                      className="border-b hover:bg-muted/50 transition"
-                    >
-                      <td className="py-3 pl-3">
-                        {format(new Date(), "MMM ddd, yyyy")}
-                      </td>
-                      <td className="py-3 capitalize">{inv.type}</td>
-                      <td
-                        className={cn(
-                          "py-3 font-semibold",
-                          inv.type === "deposit"
-                            ? "text-green-600"
-                            : "text-red-600"
-                        )}
-                      >
-                        {inv.type === "deposit" ? "+" : "-"}৳{" "}
-                        {inv.amount?.toLocaleString()}
-                      </td>
-                      <td className="py-3">
-                        <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                          Completed
-                        </span>
-                      </td>
+            {loading ? (
+              <LoadingSpinner />
+            ) : historys?.length === 0 ? (
+              <Card className="text-center py-8">
+                <p className="text-gray-500">No deposits yet</p>
+              </Card>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full border border-border text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 pl-3 font-medium text-muted-foreground">
+                        Date
+                      </th>
+                      <th className="text-left py-3 font-medium text-muted-foreground">
+                        Type
+                      </th>
+                      <th className="text-left py-3 font-medium text-muted-foreground">
+                        Amount
+                      </th>
+                      <th className="text-left py-3 font-medium text-muted-foreground">
+                        Status
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {historys.map((inv) => (
+                      <tr
+                        key={inv._id}
+                        className="border-b hover:bg-muted/50 transition"
+                      >
+                        <td className="py-3 pl-3">
+                          {format(new Date(), "MMM ddd, yyyy")}
+                        </td>
+                        <td className="py-3 capitalize">{inv.type}</td>
+                        <td
+                          className={cn(
+                            "py-3 font-semibold",
+                            inv.type === "deposit"
+                              ? "text-green-600"
+                              : "text-red-600"
+                          )}
+                        >
+                          {inv.type === "deposit" ? "+" : "-"}৳{" "}
+                          {inv.amount?.toLocaleString()}
+                        </td>
+                        <td className="py-3">
+                          <span className="inline-block px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            Completed
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </Card>
         </div>
       </UserContainer>

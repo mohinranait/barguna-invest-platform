@@ -23,8 +23,8 @@ const ProfileDropdown = () => {
         {userLoading ? (
           <Skeleton className="w-24 h-6 rounded-md" />
         ) : (
-          <div className="inline-flex cursor-pointer  items-center gap-1">
-            <User /> {user?.fullName}
+          <div className="inline-flex cursor-pointer text-nowrap items-center gap-1">
+            <User /> {user?.fullName?.split(" ")[0]}
           </div>
         )}
       </DropdownMenuTrigger>

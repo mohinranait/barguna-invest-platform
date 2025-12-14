@@ -39,6 +39,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 export default function WithdrawalsPage() {
   const { user } = useUser();
@@ -369,79 +370,85 @@ export default function WithdrawalsPage() {
               </Button>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Amount
-                    </th>
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Account
-                    </th>
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Request Date
-                    </th>
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Processed Date
-                    </th>
+            {loading ? (
+              <LoadingSpinner />
+            ) : withdrawals?.length === 0 ? (
+              <Card className="text-center py-8">
+                <p className="text-gray-500">No deposits yet</p>
+              </Card>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 font-medium text-muted-foreground">
+                        Amount
+                      </th>
+                      <th className="text-left py-3 font-medium text-muted-foreground">
+                        Account
+                      </th>
+                      <th className="text-left py-3 font-medium text-muted-foreground">
+                        Request Date
+                      </th>
+                      <th className="text-left py-3 font-medium text-muted-foreground">
+                        Processed Date
+                      </th>
 
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Status
-                    </th>
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {withdrawals.map((req) => (
-                    <tr
-                      key={req._id}
-                      className="border-b hover:bg-muted/50 transition"
-                    >
-                      <td className="py-4 font-semibold">
-                        ৳ {req.amount?.toLocaleString()}
-                      </td>
-
-                      <td className="py-4 text-muted-foreground">
-                        <p>{req.accountNumber}</p>
-                        <p className="uppercase text-xs">{req.method}</p>
-                      </td>
-
-                      <td className="py-4 text-muted-foreground">
-                        {format(new Date(req.createdAt), "MMM dd, yyyy")}
-                      </td>
-
-                      <td className="py-4 text-muted-foreground">
-                        {format(new Date(req.updatedAt), "MMM dd, yyyy")}
-                      </td>
-
-                      <td className="py-4">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`inline-flex gap-1 items-center uppercase px-3 py-1 rounded-full text-xs font-medium ${getStatusBg(
-                              req.status
-                            )}`}
-                          >
-                            {getStatusIcon(req.status)}
-                            {req.status}
-                          </span>
-                        </div>
-                      </td>
-
-                      <td className="py-4">
-                        <Button variant="ghost" size="sm">
-                          View
-                        </Button>
-                      </td>
+                      <th className="text-left py-3 font-medium text-muted-foreground">
+                        Status
+                      </th>
+                      <th className="text-left py-3 font-medium text-muted-foreground">
+                        Action
+                      </th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {withdrawals.map((req) => (
+                      <tr
+                        key={req._id}
+                        className="border-b hover:bg-muted/50 transition"
+                      >
+                        <td className="py-4 font-semibold">
+                          ৳ {req.amount?.toLocaleString()}
+                        </td>
 
-            {loading && <div>Data Loading...</div>}
+                        <td className="py-4 text-muted-foreground">
+                          <p>{req.accountNumber}</p>
+                          <p className="uppercase text-xs">{req.method}</p>
+                        </td>
+
+                        <td className="py-4 text-muted-foreground">
+                          {format(new Date(req.createdAt), "MMM dd, yyyy")}
+                        </td>
+
+                        <td className="py-4 text-muted-foreground">
+                          {format(new Date(req.updatedAt), "MMM dd, yyyy")}
+                        </td>
+
+                        <td className="py-4">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`inline-flex gap-1 items-center uppercase px-3 py-1 rounded-full text-xs font-medium ${getStatusBg(
+                                req.status
+                              )}`}
+                            >
+                              {getStatusIcon(req.status)}
+                              {req.status}
+                            </span>
+                          </div>
+                        </td>
+
+                        <td className="py-4">
+                          <Button variant="ghost" size="sm">
+                            View
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </Card>
         </div>
       </UserContainer>
