@@ -1,13 +1,5 @@
 "use client";
-import {
-  Bell,
-  CreditCard,
-  FileText,
-  Home,
-  LogOut,
-  Menu,
-  TrendingUp,
-} from "lucide-react";
+import { Bell, CreditCard, FileText, Home, LogOut, Menu } from "lucide-react";
 import React from "react";
 import {
   Drawer,

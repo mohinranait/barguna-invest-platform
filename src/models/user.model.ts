@@ -23,14 +23,41 @@ const userSchema = new mongoose.Schema(
     },
     bkashNumber: String,
     nagadNumber: String,
-    kycDocuments: [
-      {
-        type: String,
-        url: String,
-        uploadedAt: { type: Date, default: Date.now },
-        verifiedAt: Date,
+    kycDocuments: {
+      nid: {
+        nidNumber: {
+          type: String,
+        },
+        verify: {
+          type: Boolean,
+        },
+        nidFront:{
+          type: String,
+        },
+        nidBack:{
+          type: String,
+        },
       },
-    ],
+      drivingLicence: {
+        licenceNumber: {
+          type: String,
+        },
+        verify: {
+          type: Boolean,
+        },
+        licenceFront:{
+          type: String,
+        },
+        licenceBack:{
+          type: String,
+        },
+      }
+    },
+    verifiedAt: Date,
+    profile: {
+      type: String,
+      url: String,
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   },

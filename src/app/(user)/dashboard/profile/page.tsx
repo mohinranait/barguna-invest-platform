@@ -120,9 +120,6 @@ export default function ProfilePage() {
       });
     }
   }, [user]);
-  console.log({ user });
-
-  console.log({ profileData });
 
   return (
     <React.Fragment>
