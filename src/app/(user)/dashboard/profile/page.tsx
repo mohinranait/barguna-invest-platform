@@ -1,22 +1,50 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Edit2, Save, X, Upload, Eye, Download } from "lucide-react";
+import {
+  Edit2,
+  Save,
+  X,
+  Upload,
+  Eye,
+  Download,
+  CalendarIcon,
+} from "lucide-react";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
+import { useUser } from "@/providers/UserProvider";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
+type IUserFrom = {
+  fullName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: Date | null;
+  address: string;
+};
 
 export default function ProfilePage() {
+  const { user } = useUser();
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState({
-    fullName: "Ahmed Rahman",
-    email: "ahmed@example.com",
-    phone: "+880 1712345678",
-    dateOfBirth: "1990-05-15",
-    nid: "1234567890123",
-    address: "123 Main Street, Dhaka",
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [profileData, setProfileData] = useState<IUserFrom>({
+    fullName: "",
+    email: user?.email as string,
+    phone: "",
+    dateOfBirth: null,
+    address: "",
   });
 
   const [bankInfo, setBankInfo] = useState({
@@ -41,9 +69,60 @@ export default function ProfilePage() {
     setProfileData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     setIsEditing(false);
+
+    if (!profileData.fullName?.trim()) {
+      setError("Name fill is required");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const res = await fetch("/api/member/me", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ ...profileData }),
+      });
+
+      if (res.ok) {
+        toast.success("Update successfull", {
+          description: "Profit update successfully!",
+          action: {
+            label: "Undo",
+            onClick: () => console.log("Undo"),
+          },
+        });
+      } else {
+        const data = await res.json();
+        setError(data.error || "Failed to update profile");
+      }
+    } catch (err) {
+      setError("An error occurred");
+      console.error("Submit error:", err);
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        fullName: user?.fullName,
+        dateOfBirth: user?.dateOfBirth,
+        email: user?.email,
+        phone: user?.phone,
+        address: user?.address,
+      });
+    }
+  }, [user]);
+  console.log({ user });
+
+  console.log({ profileData });
 
   return (
     <React.Fragment>
@@ -58,23 +137,32 @@ export default function ProfilePage() {
                 Manage your account information and KYC documents
               </p>
             </div>
-            <Button
-              variant={isEditing ? "outline" : "default"}
-              className={isEditing ? "" : "bg-primary hover:bg-primary/90"}
-              onClick={() => setIsEditing(!isEditing)}
-            >
-              {isEditing ? (
-                <X className="mr-2" size={20} />
-              ) : (
-                <Edit2 className="mr-2" size={20} />
-              )}
-              {isEditing ? "Cancel" : "Edit Profile"}
-            </Button>
           </div>
 
           {/* Personal Information */}
           <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-6">Personal Information</h2>
+            <div className="flex justify-between flex-wrap gap-3">
+              <h2 className="text-lg font-semibold ">Personal Information</h2>
+              <Button
+                variant={isEditing ? "outline" : "default"}
+                className={isEditing ? "" : "bg-primary hover:bg-primary/90"}
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {isEditing ? (
+                  <X className="" size={20} />
+                ) : (
+                  <Edit2 className="" size={20} />
+                )}
+                {isEditing ? "Cancel" : "Edit Profile"}
+              </Button>
+            </div>
+            {error && (
+              <Alert className="border-red-200 bg-red-50">
+                <AlertDescription className="text-red-800">
+                  {error}
+                </AlertDescription>
+              </Alert>
+            )}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium mb-2">
@@ -98,6 +186,7 @@ export default function ProfilePage() {
                   value={profileData.email}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   disabled={!isEditing}
+                  readOnly
                   className="h-11"
                 />
               </div>
@@ -116,43 +205,51 @@ export default function ProfilePage() {
                 <label className="block text-sm font-medium mb-2">
                   Date of Birth
                 </label>
-                <Input
-                  type="date"
-                  value={profileData.dateOfBirth}
-                  onChange={(e) =>
-                    handleInputChange("dateOfBirth", e.target.value)
-                  }
-                  disabled={!isEditing}
-                  className="h-11"
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      disabled={!isEditing}
+                      variant="outline"
+                      data-empty={!profileData?.dateOfBirth}
+                      className="data-[empty=true]:text-muted-foreground w-full h-11 justify-start text-left font-normal"
+                    >
+                      <CalendarIcon />
+                      {profileData?.dateOfBirth ? (
+                        format(profileData?.dateOfBirth, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={profileData?.dateOfBirth as Date}
+                      onSelect={(e) =>
+                        setProfileData((prev) => ({
+                          ...prev,
+                          dateOfBirth: e as Date,
+                        }))
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  National ID
-                </label>
-                <Input
-                  value={profileData.nid}
-                  onChange={(e) => handleInputChange("nid", e.target.value)}
-                  disabled={!isEditing}
-                  className="h-11"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Address
-                </label>
-                <Input
-                  value={profileData.address}
-                  onChange={(e) => handleInputChange("address", e.target.value)}
-                  disabled={!isEditing}
-                  className="h-11"
-                />
-              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Address</label>
+              <Input
+                value={profileData.address}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                disabled={!isEditing}
+                className="h-11"
+              />
             </div>
             {isEditing && (
               <Button
                 onClick={handleSave}
                 className="mt-6 bg-primary hover:bg-primary/90"
+                type="button"
               >
                 <Save className="mr-2" size={20} />
                 Save Changes

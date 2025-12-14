@@ -1,4 +1,5 @@
 
+
 export interface IUser {
     _id: string;
     fullName: string;
@@ -8,6 +9,8 @@ export interface IUser {
     status: 'active' | 'pending' | 'suspended' | 'rejected';
     kycStatus: 'approved' | 'pending' | 'rejected';
     investedAmount: number;
+    dateOfBirth: Date ;
+    address:  string;
     profitEarned: number;
     balance: number;
     createdAt: string;

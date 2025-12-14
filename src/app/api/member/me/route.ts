@@ -25,3 +25,36 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
+
+
+// Update user
+export async function PATCH(req: NextRequest) {
+    try {
+
+        await connectDB()
+
+      
+        const authUser = await isAuth()
+        if (!authUser || authUser?.userId === "") {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+
+
+        const body = await req.json()
+        const user = await User.findByIdAndUpdate(authUser?.userId,{...body },{new:true, runValidators:true})
+        if ( !user ) {
+            return NextResponse.json({ error: "not-found" }, { status: 404 })
+        }
+           
+        return NextResponse.json( 
+            {
+                user
+            },
+            { status: 200 },
+        )
+
+    } catch (error) {
+        console.error("User error:", error)
+        return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    }
+}
