@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import KycVerifyComponent from "@/components/pages/user/KycVerifyComponent";
 
 type IUserFrom = {
   fullName: string;
@@ -46,24 +47,6 @@ export default function ProfilePage() {
     dateOfBirth: null,
     address: "",
   });
-
-  const [bankInfo, setBankInfo] = useState({
-    accountHolder: "Ahmed Rahman",
-    accountNumber: "••••••••5678",
-    bankName: "Bangladesh Bank",
-    accountType: "Savings",
-  });
-
-  const [kycDocuments, setKycDocuments] = useState([
-    { id: 1, name: "NID Card", status: "Verified", uploadDate: "Dec 1, 2024" },
-    { id: 2, name: "Passport", status: "Pending", uploadDate: "Dec 1, 2024" },
-    {
-      id: 3,
-      name: "Address Proof",
-      status: "Verified",
-      uploadDate: "Nov 28, 2024",
-    },
-  ]);
 
   const handleInputChange = (field: string, value: string) => {
     setProfileData((prev) => ({ ...prev, [field]: value }));
@@ -254,108 +237,8 @@ export default function ProfilePage() {
             )}
           </Card>
 
-          {/* Bank Information */}
-          <Card className="p-6 border-2 border-secondary/20">
-            <h2 className="text-lg font-semibold mb-6">
-              Bank & Mobile Banking Information
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Account Holder Name
-                </label>
-                <Input
-                  value={bankInfo.accountHolder}
-                  disabled
-                  className="h-11 bg-muted/50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Account Number
-                </label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={bankInfo.accountNumber}
-                    disabled
-                    className="h-11 bg-muted/50"
-                  />
-                  <Button variant="outline" size="sm">
-                    <Eye size={16} />
-                  </Button>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Bank Name
-                </label>
-                <Input
-                  value={bankInfo.bankName}
-                  disabled
-                  className="h-11 bg-muted/50"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">
-                  Account Type
-                </label>
-                <Input
-                  value={bankInfo.accountType}
-                  disabled
-                  className="h-11 bg-muted/50"
-                />
-              </div>
-            </div>
-            <Button variant="outline" className="mt-6 bg-transparent">
-              Update Banking Information
-            </Button>
-          </Card>
-
           {/* KYC Documents */}
-          <Card className="p-6">
-            <h2 className="text-lg font-semibold mb-6">KYC Documents</h2>
-            <div className="space-y-4 mb-6">
-              {kycDocuments.map((doc) => (
-                <div
-                  key={doc.id}
-                  className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border"
-                >
-                  <div>
-                    <p className="font-medium">{doc.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      Uploaded: {doc.uploadDate}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                        doc.status === "Verified"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
-                      }`}
-                    >
-                      {doc.status}
-                    </span>
-                    <Button variant="ghost" size="sm">
-                      <Download size={16} />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="border-2 border-dashed border-border rounded-lg p-8 text-center">
-              <Upload
-                className="mx-auto mb-4 text-muted-foreground"
-                size={32}
-              />
-              <p className="font-medium mb-2">Upload Additional Documents</p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Drag & drop or click to select
-              </p>
-              <Button variant="outline">Choose File</Button>
-            </div>
-          </Card>
+          <KycVerifyComponent />
 
           {/* Verification Status */}
           <Card className="p-6 bg-primary/5 border-primary/20">
