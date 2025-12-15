@@ -15,9 +15,12 @@ import {
   Shield,
   Eye,
   Home,
+  Loader2,
 } from "lucide-react";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
+import { toast } from "sonner";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 type DocumentType = "nid" | "passport" | "driving-licence" | "address-proof";
 
@@ -31,6 +34,16 @@ const KycVerificationPage = () => {
     "driving-licence": {},
     "address-proof": {},
   });
+
+  const [formData, setFormData] = useState({
+    documentNumber: "",
+    issueDate: "",
+    expiryDate: "",
+    documentDate: "",
+    addressProofType: "",
+  });
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const documentTypes = [
     {
@@ -59,17 +72,44 @@ const KycVerificationPage = () => {
     },
   ];
 
-  const handleFileUpload = (
+  const handleFileUpload = async (
     type: DocumentType,
     side: "front" | "back",
     file: File
   ) => {
-    const url = URL.createObjectURL(file);
-    setUploadedFiles((prev) => ({
-      ...prev,
-      [type]: { ...prev[type], [side]: url },
-    }));
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+      const cloudinaryUrl = await uploadToCloudinary(formData);
+      const previewUrl = URL.createObjectURL(file);
+      setUploadedFiles((prev) => ({
+        ...prev,
+        [type]: {
+          ...prev[type],
+          [side]: previewUrl,
+          [`${side}Url`]: cloudinaryUrl,
+        },
+      }));
+      toast("Upload successful", {
+        description: "Image uploaded to Cloudinary successfully",
+      });
+    } catch (error) {
+      console.error("[v0] Upload error:", error);
+      toast("Upload failed", {
+        description:
+          error instanceof Error ? error.message : "Failed to upload image",
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async () => {};
 
   const activeDocument = documentTypes.find((doc) => doc.id === activeTab)!;
   const Icon = activeDocument.icon;
@@ -90,7 +130,6 @@ const KycVerificationPage = () => {
           </p>
         </div>
 
-        {/* Document Type Selection */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 max-w-6xl mx-auto">
           {documentTypes.map((doc) => {
             const DocIcon = doc.icon;
@@ -129,8 +168,7 @@ const KycVerificationPage = () => {
           })}
         </div>
 
-        {/* Upload Section */}
-        <Card className="max-w-4xl mx-auto p-8 md:p-12 border-2 shadow-none">
+        <Card className="max-w-4xl mx-auto p-8 md:p-12 border-2 shadow-xl">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-3">
               <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
@@ -145,7 +183,6 @@ const KycVerificationPage = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Front Side Upload */}
             <div className="space-y-3">
               <Label className="text-base font-semibold flex items-center gap-2">
                 <FileText className="w-4 h-4" />
@@ -163,6 +200,7 @@ const KycVerificationPage = () => {
                   }}
                   className="hidden"
                   id={`${activeTab}-front`}
+                  disabled={isUploading}
                 />
                 <label
                   htmlFor={`${activeTab}-front`}
@@ -183,9 +221,15 @@ const KycVerificationPage = () => {
                     </div>
                   ) : (
                     <>
-                      <Upload className="w-10 h-10 text-muted-foreground mb-3" />
+                      {isUploading ? (
+                        <Loader2 className="w-10 h-10 text-primary animate-spin mb-3" />
+                      ) : (
+                        <Upload className="w-10 h-10 text-muted-foreground mb-3" />
+                      )}
                       <span className="text-sm font-medium text-muted-foreground">
-                        {activeTab === "address-proof"
+                        {isUploading
+                          ? "Uploading..."
+                          : activeTab === "address-proof"
                           ? "Click to upload document"
                           : "Click to upload front side"}
                       </span>
@@ -198,7 +242,6 @@ const KycVerificationPage = () => {
               </div>
             </div>
 
-            {/* Back Side Upload */}
             {activeTab !== "passport" && activeTab !== "address-proof" && (
               <div className="space-y-3">
                 <Label className="text-base font-semibold flex items-center gap-2">
@@ -215,6 +258,7 @@ const KycVerificationPage = () => {
                     }}
                     className="hidden"
                     id={`${activeTab}-back`}
+                    disabled={isUploading}
                   />
                   <label
                     htmlFor={`${activeTab}-back`}
@@ -235,9 +279,15 @@ const KycVerificationPage = () => {
                       </div>
                     ) : (
                       <>
-                        <Upload className="w-10 h-10 text-muted-foreground mb-3" />
+                        {isUploading ? (
+                          <Loader2 className="w-10 h-10 text-primary animate-spin mb-3" />
+                        ) : (
+                          <Upload className="w-10 h-10 text-muted-foreground mb-3" />
+                        )}
                         <span className="text-sm font-medium text-muted-foreground">
-                          Click to upload back side
+                          {isUploading
+                            ? "Uploading..."
+                            : "Click to upload back side"}
                         </span>
                         <span className="text-xs text-muted-foreground mt-1">
                           PNG, JPG up to 10MB
@@ -250,7 +300,6 @@ const KycVerificationPage = () => {
             )}
           </div>
 
-          {/* Additional Information */}
           <div className="space-y-6 mb-8">
             {activeTab !== "address-proof" && (
               <div className="space-y-2">
@@ -264,6 +313,10 @@ const KycVerificationPage = () => {
                   id="document-number"
                   placeholder={`Enter your ${activeDocument.label.toLowerCase()} number`}
                   className="h-12 text-base"
+                  value={formData.documentNumber}
+                  onChange={(e) =>
+                    handleInputChange("documentNumber", e.target.value)
+                  }
                 />
               </div>
             )}
@@ -281,6 +334,10 @@ const KycVerificationPage = () => {
                     id="document-type"
                     placeholder="e.g., Utility Bill, Bank Statement, Rental Agreement"
                     className="h-12 text-base"
+                    value={formData.addressProofType}
+                    onChange={(e) =>
+                      handleInputChange("addressProofType", e.target.value)
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -294,6 +351,10 @@ const KycVerificationPage = () => {
                     id="document-date"
                     type="date"
                     className="h-12 text-base"
+                    value={formData.documentDate}
+                    onChange={(e) =>
+                      handleInputChange("documentDate", e.target.value)
+                    }
                   />
                 </div>
               </>
@@ -310,6 +371,10 @@ const KycVerificationPage = () => {
                     id="issue-date"
                     type="date"
                     className="h-12 text-base"
+                    value={formData.issueDate}
+                    onChange={(e) =>
+                      handleInputChange("issueDate", e.target.value)
+                    }
                   />
                 </div>
                 {activeTab !== "nid" && (
@@ -324,6 +389,10 @@ const KycVerificationPage = () => {
                       id="expiry-date"
                       type="date"
                       className="h-12 text-base"
+                      value={formData.expiryDate}
+                      onChange={(e) =>
+                        handleInputChange("expiryDate", e.target.value)
+                      }
                     />
                   </div>
                 )}
@@ -331,7 +400,6 @@ const KycVerificationPage = () => {
             )}
           </div>
 
-          {/* Info Alert */}
           <div className="flex gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 mb-8">
             <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-blue-900 dark:text-blue-100">
@@ -349,22 +417,34 @@ const KycVerificationPage = () => {
             </div>
           </div>
 
-          {/* Submit Button */}
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               variant="outline"
               className="flex-1 h-12 text-base bg-transparent"
+              disabled={isSubmitting}
             >
               Save as Draft
             </Button>
-            <Button className="flex-1 h-12 text-base shadow-lg shadow-primary/25">
-              <CheckCircle2 className="w-5 h-5 mr-2" />
-              Submit for Verification
+            <Button
+              className="flex-1 h-12 text-base shadow-lg shadow-primary/25"
+              onClick={handleSubmit}
+              disabled={isSubmitting || isUploading}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-5 h-5 mr-2" />
+                  Submit for Verification
+                </>
+              )}
             </Button>
           </div>
         </Card>
 
-        {/* Security Footer */}
         <div className="text-center mt-12 max-w-2xl mx-auto">
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <Shield className="w-4 h-4" />

@@ -25,30 +25,44 @@ const userSchema = new mongoose.Schema(
     nagadNumber: String,
     kycDocuments: {
       nid: {
-        nidNumber: {
+         number: {
           type: String,
         },
         verify: {
           type: Boolean,
         },
-        nidFront:{
+        front:{
           type: String,
         },
-        nidBack:{
+        back:{
+          type: String,
+        },
+      },
+      passport: {
+        number: {
+          type: String,
+        },
+        verify: {
+          type: Boolean,
+        },
+        front:{
+          type: String,
+        },
+        back:{
           type: String,
         },
       },
       drivingLicence: {
-        licenceNumber: {
+         number: {
           type: String,
         },
         verify: {
           type: Boolean,
         },
-        licenceFront:{
+        front:{
           type: String,
         },
-        licenceBack:{
+        back:{
           type: String,
         },
       }
