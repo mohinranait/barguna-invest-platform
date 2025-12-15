@@ -2,6 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Download, Upload } from "lucide-react";
+import Link from "next/link";
 import React, { useState } from "react";
 
 const KycVerifyComponent = () => {
@@ -18,7 +19,12 @@ const KycVerifyComponent = () => {
 
   return (
     <Card className="p-6">
-      <h2 className="text-lg font-semibold ">KYC Documents</h2>
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-lg font-semibold ">KYC Documents</h2>
+        <Link href={"/dashboard/kyc"}>
+          <Button type="button">Update KYC</Button>
+        </Link>
+      </div>
       <div className="space-y-4 mb-6">
         {kycDocuments.map((doc) => (
           <div

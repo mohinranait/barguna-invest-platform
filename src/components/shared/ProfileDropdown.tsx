@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import LogoutButton from "../LogoutButton";
-import { History, LayoutDashboard, LogOut, User } from "lucide-react";
+import { Award, History, LayoutDashboard, LogOut, User } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@/providers/UserProvider";
 import { Skeleton } from "../ui/skeleton";
@@ -44,6 +44,12 @@ const ProfileDropdown = () => {
         <Link href={"/dashboard/transactions"}>
           <DropdownMenuItem>
             <History /> Transactions History
+          </DropdownMenuItem>
+        </Link>
+        <Link href={"/dashboard/kyc"}>
+          <DropdownMenuItem>
+            <Award />
+            KYC
           </DropdownMenuItem>
         </Link>
 
