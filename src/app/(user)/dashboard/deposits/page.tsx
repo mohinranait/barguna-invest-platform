@@ -175,7 +175,7 @@ export default function DepositsPage() {
         />
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap gap-3 items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Deposit </h1>
           <p className="text-muted-foreground ">
@@ -293,8 +293,8 @@ export default function DepositsPage() {
       ) : (
         <div className="space-y-3">
           {deposits.map((deposit) => (
-            <Card key={deposit._id}>
-              <CardContent>
+            <Card className="p-0" key={deposit._id}>
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <p className="font-semibold">

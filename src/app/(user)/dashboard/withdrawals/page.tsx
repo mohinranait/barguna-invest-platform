@@ -177,7 +177,7 @@ export default function WithdrawalsPage() {
         <UserHeader />
         <div className="pt-4 space-y-5">
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap gap-4 items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">Withdrawal Requests</h1>
               <p className="text-muted-foreground ">
@@ -381,20 +381,20 @@ export default function WithdrawalsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 font-medium text-muted-foreground">
+                      <th className="text-left min-w-20 py-3 font-medium text-muted-foreground">
                         Amount
                       </th>
-                      <th className="text-left py-3 font-medium text-muted-foreground">
+                      <th className="text-left min-w-[120px] py-3 font-medium text-muted-foreground">
                         Account
                       </th>
-                      <th className="text-left py-3 font-medium text-muted-foreground">
+                      <th className="text-left min-w-[100px] py-3 font-medium text-muted-foreground">
                         Request Date
                       </th>
-                      <th className="text-left py-3 font-medium text-muted-foreground">
+                      <th className="text-left min-w-[100px] py-3 font-medium text-muted-foreground">
                         Processed Date
                       </th>
 
-                      <th className="text-left py-3 font-medium text-muted-foreground">
+                      <th className="text-left min-w-20 py-3 font-medium text-muted-foreground">
                         Status
                       </th>
                       <th className="text-left py-3 font-medium text-muted-foreground">

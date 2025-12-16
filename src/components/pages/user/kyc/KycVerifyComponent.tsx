@@ -4,14 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Car,
-  Download,
-  IdCard,
-  LucideProps,
-  Plane,
-  Upload,
-} from "lucide-react";
+import { Car, Download, IdCard, LucideProps, Plane } from "lucide-react";
 import { IKyc } from "@/types/kyc.type";
 
 type KycDocId = "nid" | "passport" | "drivingLicence";
@@ -112,9 +105,9 @@ const KycVerifyComponent = () => {
           return (
             <div
               key={doc.id}
-              className="flex items-center justify-between p-4 bg-muted/30 rounded-lg border"
+              className="sm:flex gap-3 items-center justify-between p-4 bg-muted/30 rounded-lg border"
             >
-              <div className="flex items-center gap-2">
+              <div className="sm:flex items-center gap-2">
                 <div className="inline-flex items-center justify-center w-11 h-11 rounded-lg  transition-all duration-300  bg-primary/10 text-primary">
                   <Icon />
                 </div>

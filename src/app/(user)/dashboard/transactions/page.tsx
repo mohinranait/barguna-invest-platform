@@ -104,16 +104,16 @@ export default function InvestmentsPage() {
                 <table className="w-full border border-border text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-3 pl-3 font-medium text-muted-foreground">
+                      <th className="text-left min-w-[120px] py-3 pl-3 font-medium text-muted-foreground">
                         Date
                       </th>
-                      <th className="text-left py-3 font-medium text-muted-foreground">
+                      <th className="text-left min-w-20 py-3 font-medium text-muted-foreground">
                         Type
                       </th>
-                      <th className="text-left py-3 font-medium text-muted-foreground">
+                      <th className="text-left min-w-20 py-3 font-medium text-muted-foreground">
                         Amount
                       </th>
-                      <th className="text-left py-3 font-medium text-muted-foreground">
+                      <th className="text-left min-w-20 py-3 font-medium text-muted-foreground">
                         Status
                       </th>
                     </tr>
