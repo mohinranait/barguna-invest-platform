@@ -21,18 +21,21 @@ import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
 import { toast } from "sonner";
 import { uploadToCloudinary } from "@/lib/cloudinary";
+import Image from "next/image";
+import { useUser } from "@/providers/UserProvider";
 
-type DocumentType = "nid" | "passport" | "driving-licence" | "address-proof";
+type DocumentType = "nid" | "passport" | "drivingLicence" | "addressProof";
 
 const KycVerificationPage = () => {
+  const { user } = useUser();
   const [activeTab, setActiveTab] = useState<DocumentType>("nid");
   const [uploadedFiles, setUploadedFiles] = useState<
     Record<DocumentType, { front?: string; back?: string }>
   >({
     nid: {},
     passport: {},
-    "driving-licence": {},
-    "address-proof": {},
+    drivingLicence: {},
+    addressProof: {},
   });
 
   const [formData, setFormData] = useState({
@@ -59,13 +62,13 @@ const KycVerificationPage = () => {
       description: "Upload your passport document",
     },
     {
-      id: "driving-licence" as DocumentType,
+      id: "drivingLicence" as DocumentType,
       label: "Driving License",
       icon: Car,
       description: "Upload your driving license",
     },
     {
-      id: "address-proof" as DocumentType,
+      id: "addressProof" as DocumentType,
       label: "Address Proof",
       icon: Home,
       description: "Upload utility bill or bank statement",
@@ -81,21 +84,21 @@ const KycVerificationPage = () => {
       setIsUploading(true);
       const formData = new FormData();
       formData.append("file", file);
-      const cloudinaryUrl = await uploadToCloudinary(formData);
-      const previewUrl = URL.createObjectURL(file);
+      const { payload } = await uploadToCloudinary(formData);
+      console.log({ payload });
+
       setUploadedFiles((prev) => ({
         ...prev,
         [type]: {
           ...prev[type],
-          [side]: previewUrl,
-          [`${side}Url`]: cloudinaryUrl,
+          [side]: payload?.file?.fileUrl,
         },
       }));
       toast("Upload successful", {
         description: "Image uploaded to Cloudinary successfully",
       });
     } catch (error) {
-      console.error("[v0] Upload error:", error);
+      console.error("Upload error:", error);
       toast("Upload failed", {
         description:
           error instanceof Error ? error.message : "Failed to upload image",
@@ -109,10 +112,83 @@ const KycVerificationPage = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async () => {};
+  const handleSubmit = async () => {
+    try {
+      if (!uploadedFiles[activeTab]?.front) {
+        toast("Missing document", {
+          description: "Please upload at least the front side of your document",
+        });
+        return;
+      }
+
+      if (activeTab !== "addressProof" && !formData.documentNumber) {
+        toast("Missing information", {
+          description: "Please enter your document number",
+        });
+        return;
+      }
+
+      setIsSubmitting(true);
+
+      const submissionData = {
+        userId: user?._id,
+        [activeTab]: {
+          number: formData.documentNumber,
+          issueDate: formData.issueDate,
+          expiryDate: formData.expiryDate,
+          documentDate: formData.documentDate,
+          addressProofType: formData.addressProofType,
+          front:
+            uploadedFiles[activeTab].front || uploadedFiles[activeTab].front,
+          back: uploadedFiles[activeTab].back || uploadedFiles[activeTab].back,
+        },
+      };
+
+      console.log("Submitting KYC data:", submissionData);
+
+      const response = await fetch("/api/kyc/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(submissionData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Submission failed");
+      }
+
+      toast("Verification submitted", {
+        description: "Your documents have been submitted for verification",
+      });
+
+      setUploadedFiles((prev) => ({ ...prev, [activeTab]: {} }));
+      setFormData({
+        documentNumber: "",
+        issueDate: "",
+        expiryDate: "",
+        documentDate: "",
+        addressProofType: "",
+      });
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast("Submission failed", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to submit verification",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const activeDocument = documentTypes.find((doc) => doc.id === activeTab)!;
   const Icon = activeDocument.icon;
+
+  console.log({ uploadedFiles });
 
   return (
     <UserContainer className="space-y-5 pt-4 pb-6">
@@ -186,7 +262,7 @@ const KycVerificationPage = () => {
             <div className="space-y-3">
               <Label className="text-base font-semibold flex items-center gap-2">
                 <FileText className="w-4 h-4" />
-                {activeTab === "address-proof"
+                {activeTab === "addressProof"
                   ? "Document Upload"
                   : "Front Side"}
               </Label>
@@ -208,10 +284,12 @@ const KycVerificationPage = () => {
                 >
                   {uploadedFiles[activeTab]?.front ? (
                     <div className="relative w-full h-full">
-                      <img
+                      <Image
                         src={
                           uploadedFiles[activeTab].front || "/placeholder.svg"
                         }
+                        width={200}
+                        height={200}
                         alt="Front"
                         className="w-full h-full object-cover rounded-xl"
                       />
@@ -229,7 +307,7 @@ const KycVerificationPage = () => {
                       <span className="text-sm font-medium text-muted-foreground">
                         {isUploading
                           ? "Uploading..."
-                          : activeTab === "address-proof"
+                          : activeTab === "addressProof"
                           ? "Click to upload document"
                           : "Click to upload front side"}
                       </span>
@@ -242,7 +320,7 @@ const KycVerificationPage = () => {
               </div>
             </div>
 
-            {activeTab !== "passport" && activeTab !== "address-proof" && (
+            {activeTab !== "passport" && activeTab !== "addressProof" && (
               <div className="space-y-3">
                 <Label className="text-base font-semibold flex items-center gap-2">
                   <FileText className="w-4 h-4" />
@@ -266,10 +344,12 @@ const KycVerificationPage = () => {
                   >
                     {uploadedFiles[activeTab]?.back ? (
                       <div className="relative w-full h-full">
-                        <img
+                        <Image
                           src={
                             uploadedFiles[activeTab].back || "/placeholder.svg"
                           }
+                          width={200}
+                          height={200}
                           alt="Back"
                           className="w-full h-full object-cover rounded-xl"
                         />
@@ -301,7 +381,7 @@ const KycVerificationPage = () => {
           </div>
 
           <div className="space-y-6 mb-8">
-            {activeTab !== "address-proof" && (
+            {activeTab !== "addressProof" && (
               <div className="space-y-2">
                 <Label
                   htmlFor="document-number"
@@ -321,7 +401,7 @@ const KycVerificationPage = () => {
               </div>
             )}
 
-            {activeTab === "address-proof" ? (
+            {activeTab === "addressProof" ? (
               <>
                 <div className="space-y-2">
                   <Label
@@ -407,7 +487,7 @@ const KycVerificationPage = () => {
               <ul className="list-disc list-inside space-y-1 text-blue-800 dark:text-blue-200">
                 <li>Ensure all text is clearly visible and readable</li>
                 <li>Avoid glare, shadows, or blurry images</li>
-                {activeTab === "address-proof" ? (
+                {activeTab === "addressProof" ? (
                   <li>Document must be issued within the last 3 months</li>
                 ) : (
                   <li>Document should be valid and not expired</li>
