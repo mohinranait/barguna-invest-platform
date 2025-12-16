@@ -98,7 +98,7 @@ const KycVerificationPage = () => {
               <button
                 key={doc.id}
                 onClick={() => setActiveTab(doc.id)}
-                className={`group relative p-6 rounded-2xl border transition-all duration-300 text-left ${
+                className={`group relative cursor-pointer p-6 rounded-2xl border transition-all duration-300 text-left ${
                   isActive
                     ? "border-primary bg-primary/5 shadow-none shadow-primary/10"
                     : "border-border hover:border-primary/50 bg-card"
@@ -141,8 +141,12 @@ const KycVerificationPage = () => {
             </p>
           </div>
 
-          {activeDocument?.id === "passport" && <PassportKyc />}
-          {activeDocument?.id === "drivingLicence" && <LicenceKyc />}
+          {activeDocument?.id === "passport" && (
+            <PassportKyc selectedKyc={selectedKyc} />
+          )}
+          {activeDocument?.id === "drivingLicence" && (
+            <LicenceKyc selectedKyc={selectedKyc} />
+          )}
           {activeDocument?.id === "nid" && <NidKyc selectedKyc={selectedKyc} />}
         </Card>
 

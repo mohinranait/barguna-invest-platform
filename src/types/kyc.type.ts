@@ -9,8 +9,8 @@ export interface IPassportAndLicence {
     verify: boolean,
     front: string,
     back: string,
-    issueDate: Date | string,
-    expireDate: Date | string,
+    issueDate: Date | null,
+    expireDate: Date | null,
 }
 export interface IKyc {
     _id: string,

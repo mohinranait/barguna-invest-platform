@@ -1,10 +1,19 @@
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import { useUser } from "@/providers/UserProvider";
+import { IKyc, IPassportAndLicence } from "@/types/kyc.type";
+import { format } from "date-fns";
 import {
   AlertCircle,
+  CalendarIcon,
   CheckCircle2,
   Eye,
   FileText,
@@ -12,18 +21,21 @@ import {
   Upload,
 } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-const PassportKyc = () => {
+type Props = {
+  selectedKyc: IKyc | undefined;
+};
+const PassportKyc = ({ selectedKyc }: Props) => {
   const { user } = useUser();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<IPassportAndLicence>({
     number: "",
     verify: false,
     front: "",
     back: "",
-    issueDate: "",
-    expireDate: "",
+    issueDate: null,
+    expireDate: null,
   });
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -59,7 +71,7 @@ const PassportKyc = () => {
 
   const handleSubmit = async () => {
     try {
-      if (formData?.front) {
+      if (!formData?.front) {
         toast("Missing document", {
           description: "Please upload at least the front side of your document",
         });
@@ -68,7 +80,7 @@ const PassportKyc = () => {
 
       setIsSubmitting(true);
 
-      const response = await fetch("/api/kyc/submit", {
+      const response = await fetch("/api/member/kyc", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -99,11 +111,22 @@ const PassportKyc = () => {
     }
   };
 
+  useEffect(() => {
+    if (!selectedKyc) {
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      ...selectedKyc.passport,
+    }));
+  }, [selectedKyc]);
+
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="space-y-3">
-          <Label className="text-base font-semibold flex items-center gap-2">
+          <Label className=" flex items-center gap-2">
             <FileText className="w-4 h-4" />
             Front Side
           </Label>
@@ -158,9 +181,9 @@ const PassportKyc = () => {
         </div>
       </div>
 
-      <div className="space-y-6 mb-8">
+      <div className="space-y-6 ">
         <div className="space-y-2">
-          <Label htmlFor="document-number" className="text-base font-semibold">
+          <Label htmlFor="document-number" className="">
             Passport Number
           </Label>
           <Input
@@ -168,37 +191,79 @@ const PassportKyc = () => {
             placeholder={`Enter your passport number`}
             className="h-12 text-base"
             value={formData.number}
-            onChange={(e) =>
-              handleInputChange("documentNumber", e.target.value)
-            }
+            onChange={(e) => handleInputChange("number", e.target.value)}
           />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="issue-date" className="text-base font-semibold">
+            <Label htmlFor="issue-date" className=" ">
               Issue Date
             </Label>
-            <Input
-              id="issue-date"
-              type="date"
-              className="h-12 text-base"
-              value={formData.issueDate}
-              onChange={(e) => handleInputChange("issueDate", e.target.value)}
-            />
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  data-empty={!formData.issueDate}
+                  className="data-[empty=true]:text-muted-foreground w-full h-11 justify-start text-left font-normal"
+                >
+                  <CalendarIcon />
+                  {formData.issueDate ? (
+                    format(formData.issueDate, "MMM dd, yyyy")
+                  ) : (
+                    <span>Select issue date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={formData.issueDate as Date}
+                  onSelect={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      issueDate: e as Date,
+                    }))
+                  }
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="expiry-date" className="text-base font-semibold">
+            <Label htmlFor="expiry-date" className="">
               Expiry Date
             </Label>
-            <Input
-              id="expiry-date"
-              type="date"
-              className="h-12 text-base"
-              value={formData.expireDate}
-              onChange={(e) => handleInputChange("expireDate", e.target.value)}
-            />
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  data-empty={!formData.expireDate}
+                  className="data-[empty=true]:text-muted-foreground w-full h-11 justify-start text-left font-normal"
+                >
+                  <CalendarIcon />
+                  {formData.expireDate ? (
+                    format(formData.expireDate, "MMM dd, yyyy")
+                  ) : (
+                    <span>Select expiry date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={formData.expireDate as Date}
+                  onSelect={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      expireDate: e as Date,
+                    }))
+                  }
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
@@ -216,14 +281,7 @@ const PassportKyc = () => {
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Button
-          variant="outline"
-          className="flex-1 h-12 text-base bg-transparent"
-          disabled={isSubmitting}
-        >
-          Save as Draft
-        </Button>
+      <div className="">
         <Button
           className="flex-1 h-12 text-base shadow-lg shadow-primary/25"
           onClick={handleSubmit}

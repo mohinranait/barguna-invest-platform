@@ -27,7 +27,11 @@ const NidKyc = ({ selectedKyc }: Props) => {
     front: "",
     back: "",
   });
-  const [isUploading, setIsUploading] = useState(false);
+
+  const [isUploading, setIsUploading] = useState<{
+    side: "front" | "back";
+    loading: boolean;
+  }>({ side: "front", loading: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
@@ -36,7 +40,10 @@ const NidKyc = ({ selectedKyc }: Props) => {
 
   const handleFileUpload = async (side: "front" | "back", file: File) => {
     try {
-      setIsUploading(true);
+      setIsUploading({
+        loading: true,
+        side,
+      });
       const formData = new FormData();
       formData.append("file", file);
       const { payload } = await uploadToCloudinary(formData);
@@ -55,11 +62,12 @@ const NidKyc = ({ selectedKyc }: Props) => {
           error instanceof Error ? error.message : "Failed to upload image",
       });
     } finally {
-      setIsUploading(false);
+      setIsUploading({
+        loading: true,
+        side,
+      });
     }
   };
-
-  console.log({ formData });
 
   const handleSubmit = async () => {
     try {
@@ -132,7 +140,7 @@ const NidKyc = ({ selectedKyc }: Props) => {
               }}
               className="hidden"
               id={`nid-front`}
-              disabled={isUploading}
+              disabled={isUploading.loading && isUploading.side === "front"}
             />
             <label
               htmlFor={`nid-front`}
@@ -153,13 +161,13 @@ const NidKyc = ({ selectedKyc }: Props) => {
                 </div>
               ) : (
                 <>
-                  {isUploading ? (
+                  {isUploading.loading && isUploading.side === "front" ? (
                     <Loader2 className="w-10 h-10 text-primary animate-spin mb-3" />
                   ) : (
                     <Upload className="w-10 h-10 text-muted-foreground mb-3" />
                   )}
                   <span className="text-sm font-medium text-muted-foreground">
-                    {isUploading
+                    {isUploading.loading && isUploading.side === "front"
                       ? "Uploading..."
                       : "Click to upload front side"}
                   </span>
@@ -187,7 +195,7 @@ const NidKyc = ({ selectedKyc }: Props) => {
               }}
               className="hidden"
               id={`nid-back`}
-              disabled={isUploading}
+              disabled={isUploading.loading && isUploading.side === "back"}
             />
             <label
               htmlFor={`nid-back`}
@@ -208,13 +216,15 @@ const NidKyc = ({ selectedKyc }: Props) => {
                 </div>
               ) : (
                 <>
-                  {isUploading ? (
+                  {isUploading.loading && isUploading.side === "back" ? (
                     <Loader2 className="w-10 h-10 text-primary animate-spin mb-3" />
                   ) : (
                     <Upload className="w-10 h-10 text-muted-foreground mb-3" />
                   )}
                   <span className="text-sm font-medium text-muted-foreground">
-                    {isUploading ? "Uploading..." : "Click to upload back side"}
+                    {isUploading.loading && isUploading.side === "back"
+                      ? "Uploading..."
+                      : "Click to upload back side"}
                   </span>
                   <span className="text-xs text-muted-foreground mt-1">
                     PNG, JPG up to 10MB
@@ -258,7 +268,7 @@ const NidKyc = ({ selectedKyc }: Props) => {
         <Button
           className=" h-12 text-base shadow-lg shadow-primary/25"
           onClick={handleSubmit}
-          disabled={isSubmitting || isUploading}
+          disabled={isSubmitting || isUploading.loading}
         >
           {isSubmitting ? (
             <>
