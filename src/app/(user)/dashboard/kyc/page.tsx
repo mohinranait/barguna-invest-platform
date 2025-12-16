@@ -15,6 +15,7 @@ import PassportKyc from "@/components/pages/user/kyc/PassportKyc";
 import LicenceKyc from "@/components/pages/user/kyc/LicenceKyc";
 import NidKyc from "@/components/pages/user/kyc/NidKyc";
 import { IKyc } from "@/types/kyc.type";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 export type DocumentType =
   | "nid"
@@ -52,6 +53,7 @@ const KycVerificationPage = () => {
     fetchKyc();
   }, []);
 
+  // Get kyc for authenticated user
   const fetchKyc = async () => {
     try {
       setLoading(true);
@@ -141,13 +143,21 @@ const KycVerificationPage = () => {
             </p>
           </div>
 
-          {activeDocument?.id === "passport" && (
-            <PassportKyc selectedKyc={selectedKyc} />
+          {loading ? (
+            <LoadingSpinner />
+          ) : (
+            <>
+              {activeDocument?.id === "passport" && (
+                <PassportKyc selectedKyc={selectedKyc} />
+              )}
+              {activeDocument?.id === "drivingLicence" && (
+                <LicenceKyc selectedKyc={selectedKyc} />
+              )}
+              {activeDocument?.id === "nid" && (
+                <NidKyc selectedKyc={selectedKyc} />
+              )}
+            </>
           )}
-          {activeDocument?.id === "drivingLicence" && (
-            <LicenceKyc selectedKyc={selectedKyc} />
-          )}
-          {activeDocument?.id === "nid" && <NidKyc selectedKyc={selectedKyc} />}
         </Card>
 
         <div className="text-center mt-12 max-w-2xl mx-auto">
