@@ -1,11 +1,11 @@
 import mongoose, { Types } from "mongoose"
 
-const userSchema = new mongoose.Schema(
+const kycSchema = new mongoose.Schema(
   {
     userId: { type: Types.ObjectId, ref:"User", required:true }, 
   
     nid: {
-        number: {
+        nidNumber: {
             type: String,
         },
         verify: {
@@ -31,6 +31,12 @@ const userSchema = new mongoose.Schema(
         back:{
             type: String,
         },
+        issueDate:{
+            type: String,
+        },
+        expireDate:{
+            type: String,
+        },
     },
     drivingLicence: {
         number: {
@@ -45,14 +51,19 @@ const userSchema = new mongoose.Schema(
         back:{
             type: String,
         },
+        issueDate:{
+            type: String,
+        },
+        expireDate:{
+            type: String,
+        },
     },
     profile: {
       type: String,
       url: String,
     },
-   
   },
   { timestamps: true },
 )
 
-export const User = mongoose.models.User || mongoose.model("User", userSchema)
+export const Kyc = mongoose.models.Kyc || mongoose.model("Kyc", kycSchema)

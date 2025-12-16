@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Mail, Lock, ArrowRight } from "lucide-react";
+import { Mail, Lock, LoaderCircle } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -138,8 +138,8 @@ export default function LoginPage() {
             className="w-full bg-primary hover:bg-primary/90"
             disabled={loading}
           >
-            {loading ? "Signing in..." : "Sign In"}{" "}
-            <ArrowRight className="ml-2" size={20} />
+            {loading && <LoaderCircle className="animate-spin" />}
+            Sign In
           </Button>
         </form>
 

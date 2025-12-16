@@ -25,7 +25,7 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import KycVerifyComponent from "@/components/pages/user/KycVerifyComponent";
+import KycVerifyComponent from "@/components/pages/user/kyc/KycVerifyComponent";
 
 type IUserFrom = {
   fullName: string;

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { User, Mail, Phone, Lock, ArrowRight, ArrowLeft } from "lucide-react";
+import { User, Mail, Phone, Lock, ArrowLeft, LoaderCircle } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -260,8 +260,13 @@ export default function RegisterPage() {
               }`}
               disabled={loading}
             >
-              {step === 1 ? "Next" : loading ? "Creating..." : "Create Account"}
-              <ArrowRight className="ml-2" size={20} />
+              {step === 1 ? (
+                "Next"
+              ) : loading ? (
+                <LoaderCircle className="animate-spin" />
+              ) : (
+                "Create Account"
+              )}
             </Button>
           </div>
         </form>
