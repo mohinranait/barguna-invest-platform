@@ -86,7 +86,11 @@ const PassportKyc = ({ selectedKyc }: Props) => {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ userId: user?._id, passport: formData }),
+        body: JSON.stringify({
+          userId: user?._id,
+          passport: formData,
+          status: "Pending",
+        }),
       });
 
       const result = await response.json();

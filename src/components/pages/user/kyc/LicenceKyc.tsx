@@ -95,7 +95,11 @@ const LicenceKyc = ({ selectedKyc }: Props) => {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ userId: user?._id, nid: formData }),
+        body: JSON.stringify({
+          userId: user?._id,
+          nid: formData,
+          status: "Pending",
+        }),
       });
 
       const result = await response.json();

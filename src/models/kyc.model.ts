@@ -3,7 +3,11 @@ import mongoose, { Types } from "mongoose"
 const kycSchema = new mongoose.Schema(
   {
     userId: { type: Types.ObjectId, ref:"User", required:true }, 
-  
+    status: {
+        type: String,
+        enum: ['Pending',"Need NID","Need Passport","Need Licence","Verified"],
+        default:"Pending"
+    },
     nid: {
         nidNumber: {
             type: String,
@@ -17,6 +21,7 @@ const kycSchema = new mongoose.Schema(
         back:{
             type: String,
         },
+        note:{    type: String }
     },
     passport: {
         number: {
@@ -37,6 +42,7 @@ const kycSchema = new mongoose.Schema(
         expireDate:{
             type: String,
         },
+        note:{    type: String }
     },
     drivingLicence: {
         number: {
@@ -57,6 +63,7 @@ const kycSchema = new mongoose.Schema(
         expireDate:{
             type: String,
         },
+        note:{    type: String }
     },
     profile: {
       type: String,
