@@ -36,6 +36,7 @@ const PassportKyc = ({ selectedKyc }: Props) => {
     back: "",
     issueDate: null,
     expireDate: null,
+    note: "",
   });
   const [isUploading, setIsUploading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -130,7 +131,7 @@ const PassportKyc = ({ selectedKyc }: Props) => {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div className="space-y-3">
-          <Label className=" flex items-center gap-2">
+          <Label className=" flex items-center text-base font-semibold gap-2">
             <FileText className="w-4 h-4" />
             Front Side
           </Label>
@@ -187,7 +188,7 @@ const PassportKyc = ({ selectedKyc }: Props) => {
 
       <div className="space-y-6 ">
         <div className="space-y-2">
-          <Label htmlFor="document-number" className="">
+          <Label htmlFor="document-number" className="text-base font-semibold">
             Passport Number
           </Label>
           <Input
@@ -201,7 +202,7 @@ const PassportKyc = ({ selectedKyc }: Props) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="issue-date" className=" ">
+            <Label htmlFor="issue-date" className="text-base font-semibold ">
               Issue Date
             </Label>
 
@@ -236,7 +237,7 @@ const PassportKyc = ({ selectedKyc }: Props) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="expiry-date" className="">
+            <Label htmlFor="expiry-date" className="text-base font-semibold">
               Expiry Date
             </Label>
 

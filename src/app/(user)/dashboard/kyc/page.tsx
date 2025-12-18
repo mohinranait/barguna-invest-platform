@@ -7,6 +7,7 @@ import {
   Plane,
   Car,
   Shield,
+  CheckCircle2Icon,
 } from "lucide-react";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
@@ -16,12 +17,9 @@ import LicenceKyc from "@/components/pages/user/kyc/LicenceKyc";
 import NidKyc from "@/components/pages/user/kyc/NidKyc";
 import { IKyc } from "@/types/kyc.type";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-export type DocumentType =
-  | "nid"
-  | "passport"
-  | "drivingLicence"
-  | "addressProof";
+export type DocumentType = "nid" | "passport" | "drivingLicence";
 
 const KycVerificationPage = () => {
   const [activeTab, setActiveTab] = useState<DocumentType>("nid");
@@ -91,7 +89,7 @@ const KycVerificationPage = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1  md:grid-cols-3 gap-4 mb-8 max-w-6xl mx-auto">
           {documentTypes.map((doc) => {
             const DocIcon = doc.icon;
             const isActive = activeTab === doc.id;
@@ -129,19 +127,35 @@ const KycVerificationPage = () => {
           })}
         </div>
 
-        <Card className="max-w-4xl mx-auto p-8 md:p-12 border shadow-none">
-          <div className="mb-8">
+        <Card className="max-w-4xl mx-auto p-4 md:p-12 border shadow-none">
+          <div className="mb-4">
             <div className="flex items-center gap-3 mb-3">
               <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
                 <Icon className="w-5 h-5 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold">{activeDocument.label}</h2>
+              <h2 className="text-lg md:text-2xl font-bold">
+                {activeDocument.label}
+              </h2>
             </div>
             <p className="text-muted-foreground">
               Please upload clear, high-quality images of your document. Make
               sure all information is visible and readable.
             </p>
           </div>
+
+          {selectedKyc &&
+            !selectedKyc[activeDocument?.id as DocumentType]?.verify &&
+            selectedKyc[activeDocument?.id as DocumentType]?.note && (
+              <Alert variant={"destructive"} className="bg-red-100">
+                <CheckCircle2Icon />
+                <AlertTitle className="font-semibold">
+                  Importent notice
+                </AlertTitle>
+                <AlertDescription>
+                  {selectedKyc[activeDocument?.id as DocumentType]?.note}
+                </AlertDescription>
+              </Alert>
+            )}
 
           {loading ? (
             <LoadingSpinner />

@@ -9,8 +9,6 @@ import {
   FileText,
   AlertCircle,
   X,
-  Icon,
-  Bell,
   HardDrive,
 } from "lucide-react";
 import { IKyc } from "@/types/kyc.type";
@@ -117,7 +115,7 @@ export default function KYCVerificationPage() {
         };
       }
 
-      const res = await fetch(`/api/admin/kyc/${selectedRequest?._id}`, {
+      await fetch(`/api/admin/kyc/${selectedRequest?._id}`, {
         method: "PATCH",
         headers: {
           "Content-type": "Application/json",
@@ -154,7 +152,7 @@ export default function KYCVerificationPage() {
 
         <div className="space-y-4">
           {kycRequests?.length === 0 && (
-            <Empty className="from-muted/50 to-background h-full bg-gradient-to-b from-30%">
+            <Empty className="from-muted/50 to-background h-full  from-30%">
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   <HardDrive />

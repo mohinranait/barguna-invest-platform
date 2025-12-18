@@ -3,6 +3,7 @@ export interface INid {
     verify: boolean;
     front: string;
     back: string;
+    note: string;
 }
 export interface IPassportAndLicence {
     number: string;
@@ -11,6 +12,7 @@ export interface IPassportAndLicence {
     back: string;
     issueDate: Date | null;
     expireDate: Date | null;
+    note: string;
 }
 
 type TUserId = {

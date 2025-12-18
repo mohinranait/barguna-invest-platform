@@ -36,6 +36,7 @@ const LicenceKyc = ({ selectedKyc }: Props) => {
     back: "",
     issueDate: null,
     expireDate: null,
+    note: "",
   });
   const [isUploading, setIsUploading] = useState<{
     side: "front" | "back";
@@ -265,7 +266,7 @@ const LicenceKyc = ({ selectedKyc }: Props) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="issue-date" className=" ">
+            <Label htmlFor="issue-date" className="text-base font-semibold ">
               Issue Date
             </Label>
 
@@ -300,7 +301,7 @@ const LicenceKyc = ({ selectedKyc }: Props) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="expiry-date" className="">
+            <Label htmlFor="expiry-date" className="text-base font-semibold">
               Expiry Date
             </Label>
 
