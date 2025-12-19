@@ -26,7 +26,7 @@ export function StatCard({
 
   return (
     <Card className="p-6 gap-0 backdrop-blur-3xl  ">
-      <div className="flex items-start justify-between mb-4">
+      <div className="flex items-start justify-between mb-2">
         <div className="text-primary">{icon}</div>
       </div>
       <p className="text-sm font-medium text-muted-foreground mb-2">{label}</p>

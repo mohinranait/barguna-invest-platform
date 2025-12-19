@@ -49,6 +49,12 @@ const items = [
   },
 
   {
+    title: "Operations",
+    url: "/admin/operations",
+    icon: Settings,
+  },
+
+  {
     title: "Settings",
     url: "/admin/settings",
     icon: Settings,
