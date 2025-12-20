@@ -21,26 +21,29 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ICompanyProfit, IProfitRequest } from "@/types/company-profit.type";
 import { useUser } from "@/providers/UserProvider";
 import { format } from "date-fns";
 import { Label } from "@/components/ui/label";
+import {
+  ICompanyOperation,
+  IOperationRequest,
+} from "@/types/company-operation.type";
 
 export default function OperationsPage() {
   const { user } = useUser();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
-  const [profits, setProfits] = useState<ICompanyProfit[]>([]);
+  const [profits, setProfits] = useState<ICompanyOperation[]>([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // Modal control
   const [open, setOpen] = useState(false);
 
-  const [formData, setFormData] = useState<IProfitRequest>({
+  const [formData, setFormData] = useState<IOperationRequest>({
     createdBy: user?._id as string,
     amount: 0,
-    type: "increase",
+    type: "profit",
     note: "",
     distributed: true,
   });
@@ -52,7 +55,7 @@ export default function OperationsPage() {
   const fetchProfits = async () => {
     try {
       setLoading(true);
-      const res = await fetch("/api/admin/company-profit", {
+      const res = await fetch("/api/admin/company-operation", {
         method: "GET",
         credentials: "include",
       });
@@ -79,7 +82,7 @@ export default function OperationsPage() {
 
     try {
       setSubmitting(true);
-      const res = await fetch("/api/admin/company-profit", {
+      const res = await fetch("/api/admin/company-operation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -93,7 +96,7 @@ export default function OperationsPage() {
         setFormData({
           createdBy: user?._id as string,
           amount: 0,
-          type: "increase",
+          type: "profit",
           note: "",
           distributed: false,
         });
@@ -112,10 +115,10 @@ export default function OperationsPage() {
   };
 
   // Handle distributed from table action button
-  const handleDistributed = async (op: ICompanyProfit) => {
+  const handleDistributed = async (op: ICompanyOperation) => {
     try {
       setSubmitting(true);
-      await fetch(`/api/admin/company-profit/${op?._id}`, {
+      await fetch(`/api/admin/company-operation/${op?._id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -212,7 +215,7 @@ export default function OperationsPage() {
                 onValueChange={(value) =>
                   setFormData({
                     ...formData,
-                    type: value as "increase" | "decrease",
+                    type: value as "profit" | "loss" | "running",
                   })
                 }
               >
@@ -220,8 +223,9 @@ export default function OperationsPage() {
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="increase">Business Income</SelectItem>
-                  <SelectItem value="decrease">Business Expense</SelectItem>
+                  <SelectItem value="running">Current Invest </SelectItem>
+                  <SelectItem value="profit">Business Profit</SelectItem>
+                  <SelectItem value="loss">Business Loss</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -257,16 +261,16 @@ export default function OperationsPage() {
               />
             </div>
 
-            <Label className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 has-[[aria-checked=true]]:border-blue-600 has-[[aria-checked=true]]:bg-blue-50 dark:has-[[aria-checked=true]]:border-blue-900 dark:has-[[aria-checked=true]]:bg-blue-950">
+            <Label className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 ">
               <Checkbox
                 id="toggle-2"
                 defaultChecked={formData?.distributed}
-                onCheckedChange={(e) =>
+                onCheckedChange={(e) => {
                   setFormData((prev) => ({
                     ...prev,
                     distributed: e as boolean,
-                  }))
-                }
+                  }));
+                }}
                 className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
               />
               <div className="grid gap-1.5 font-normal">
@@ -324,12 +328,12 @@ export default function OperationsPage() {
                   >
                     <td className="py-3">
                       <div className="flex items-center gap-2">
-                        {op.type === "increase" ? (
+                        {op.type === "profit" ? (
                           <Plus className="text-green-600" size={16} />
                         ) : (
                           <Minus className="text-red-600" size={16} />
                         )}
-                        {op.type === "increase"
+                        {op.type === "profit"
                           ? "Business Income"
                           : "Business Expense"}
                       </div>
@@ -337,12 +341,10 @@ export default function OperationsPage() {
                     <td className="py-3">{op.note}</td>
                     <td
                       className={`py-3 text-right font-semibold ${
-                        op.type === "increase"
-                          ? "text-green-600"
-                          : "text-red-600"
+                        op.type === "profit" ? "text-green-600" : "text-red-600"
                       }`}
                     >
-                      {op.type === "increase" ? "+" : "-"}৳ {op.amount}
+                      {op.type === "profit" ? "+" : "-"}৳ {op.amount}
                     </td>
                     <td className="py-3 text-right text-muted-foreground">
                       {format(new Date(op.createdAt), "MMM dd, yyyy")}

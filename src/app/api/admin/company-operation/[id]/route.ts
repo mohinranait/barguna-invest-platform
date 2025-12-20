@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/db";
 import { isAuth } from "@/lib/helpers";
-import { CompanyProfit } from "@/models/company-profit.model";
+import { CompanyProfit } from "@/models/company-operation.model";
 import { ProfitDistribution } from "@/models/profit-distribution.model";
 import { User } from "@/models/user.model";
 import { AnyBulkWriteOperation } from "mongoose";

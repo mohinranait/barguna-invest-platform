@@ -1,13 +1,13 @@
 import { model, models, Schema, Types } from "mongoose"
 
-const companyProfit = new Schema(
+const companyOperation = new Schema(
   {
     createdBy: { type: Types.ObjectId, ref:"User", required:true },
     amount: { type: Number, required: true, },
     type: {
         type: String,
-        enum: ['increase',"decrease"],
-        default: 'increase'
+        enum: ['profit',"running","loss"],
+        default: 'profit'
     },
     distributed: {
       type: Boolean,
@@ -20,4 +20,4 @@ const companyProfit = new Schema(
   { timestamps: true },
 )
 
-export const CompanyProfit = models.CompanyProfit || model("CompanyProfit", companyProfit)
+export const CompanyOperation = models.CompanyOperation || model("CompanyOperation", companyOperation)

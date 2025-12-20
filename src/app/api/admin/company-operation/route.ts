@@ -1,9 +1,11 @@
 import { connectDB } from "@/lib/db"
 import { isAuth } from "@/lib/helpers"
-import { CompanyProfit } from "@/models/company-profit.model"
+import { CompanyOperation } from "@/models/company-operation.model"
+import { CompanyWallet } from "@/models/CompanyWallet.model"
+
 import { ProfitDistribution } from "@/models/profit-distribution.model"
 import { User } from "@/models/user.model"
-import { ICompanyProfit } from "@/types/company-profit.type"
+import { ICompanyOperation } from "@/types/company-operation.type"
 import { AnyBulkWriteOperation } from "mongoose"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -24,12 +26,25 @@ export async function POST(req:NextRequest) {
         }
 
         const body = await req.json()
-        const profit = await CompanyProfit.create({...body}) as unknown as ICompanyProfit ;
+        const profit = await CompanyOperation.create({...body}) as unknown as ICompanyOperation ;
         if ( !profit ) {
             return NextResponse.json({ error: "Not created" }, { status: 401 })
         }
+
+
+        // for compnay invest block
+        if(body?.type === 'running'){
+            await CompanyWallet.findOneAndUpdate({},{
+                $inc: {
+                    totalFund: -profit?.amount,
+                    investedFund: profit?.amount
+               }
+            },{new :true, runValidators:true})
+        }
         
-        if(body?.distributed){
+
+        // Share company profit or loss
+        if(body?.distributed && body?.type !== 'running'){
            
             // get all users
             const users = await User.find({}).select('balance profitEarned').lean();
@@ -62,8 +77,8 @@ export async function POST(req:NextRequest) {
                         filter: {_id: user?._id },
                         update: {
                             $inc: {
-                                profitEarned: profit?.type === 'increase' ?  userProfit: -userProfit ,
-                                balance: profit?.type === 'increase' ?  userProfit: -userProfit 
+                                profitEarned: profit?.type === 'profit' ?  userProfit: -userProfit ,
+                                balance: profit?.type === 'profit' ?  userProfit: -userProfit 
                             }
                         }
                     }
@@ -121,7 +136,7 @@ export async function GET(req: NextRequest) {
 
     const query = {}
 
-    const profits = await CompanyProfit.find(query).populate({
+    const profits = await CompanyOperation.find(query).populate({
       path:"createdBy",
       select: 'fullName phone email'
     }).lean()

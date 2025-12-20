@@ -1,16 +1,16 @@
 
-export type TProfitType  = 'increase' | "decrease" ;
+export type TOperationType  = 'profit' | "running" | "loss" ;
 
 // Base Deposit type
-type BaseProfit = {
+type BaseOperation = {
     amount: number;
-    type: TProfitType;
+    type: TOperationType;
     note: string;
     distributed: boolean;
 }
 
 // This type for form
-export interface IProfitRequest extends BaseProfit {
+export interface IOperationRequest extends BaseOperation {
      createdBy: string;
 }
 
@@ -22,7 +22,7 @@ export type CreatedByUser = {
 }
 
 // This is Deposit type
-export interface ICompanyProfit  extends BaseProfit
+export interface ICompanyOperation  extends BaseOperation
 {
     _id: string;
     createdBy: CreatedByUser;

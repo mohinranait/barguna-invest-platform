@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db"
 import { isAuth } from "@/lib/helpers"
+import { CompanyWallet } from "@/models/CompanyWallet.model"
 import { Deposit } from "@/models/deposit.model"
 import { Transaction } from "@/models/transaction.model"
 import { User } from "@/models/user.model"
@@ -37,9 +38,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
                     investedAmount: deposit?.amount
                }
             },{new:true, runValidators:true});
-             if ( !user ) {
+            if ( !user ) {
                 return NextResponse.json({ error: "not-found" }, { status: 404 })
             }
+
+            await CompanyWallet.findOneAndUpdate({},{
+                $inc: {
+                    totalFund: deposit?.amount,
+               }
+            },{new:true, runValidators:true})
 
             // Create transaction
             await Transaction.create({
