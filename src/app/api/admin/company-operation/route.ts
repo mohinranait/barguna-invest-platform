@@ -33,11 +33,11 @@ export async function POST(req:NextRequest) {
 
 
         // for compnay invest block
-        if(body?.type === 'running'){
+        if(body?.type !== 'loss'){
             await CompanyWallet.findOneAndUpdate({},{
                 $inc: {
-                    totalFund: -profit?.amount,
-                    investedFund: profit?.amount
+                    availableFund: body?.type === 'running' ? -profit?.amount : profit?.amount ,
+                    investedFund: body?.type === 'running' ? profit?.amount : 0
                }
             },{new :true, runValidators:true})
         }
@@ -100,6 +100,15 @@ export async function POST(req:NextRequest) {
 
             await User.bulkWrite(userOps);
             await ProfitDistribution.bulkWrite(profitOps);
+            
+
+             await CompanyWallet.findOneAndUpdate({},{
+                $inc: {
+                    availableFund: body?.type === 'loss' ? -profit?.amount : profit?.amount ,
+               }
+            },{new :true, runValidators:true})
+
+
 
         }
 

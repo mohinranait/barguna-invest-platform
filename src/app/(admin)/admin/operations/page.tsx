@@ -28,12 +28,14 @@ import {
   ICompanyOperation,
   IOperationRequest,
 } from "@/types/company-operation.type";
+import { IWallet } from "@/types/wallet.type";
 
 export default function OperationsPage() {
   const { user } = useUser();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [profits, setProfits] = useState<ICompanyOperation[]>([]);
+  const [wallet, setWallet] = useState<IWallet>();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -50,8 +52,26 @@ export default function OperationsPage() {
 
   useEffect(() => {
     fetchProfits();
+    fetchWallet();
   }, []);
 
+  const fetchWallet = async () => {
+    try {
+      const res = await fetch("/api/admin/wallet", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setWallet(data.wallet);
+      }
+    } catch (err) {
+      console.error("Fetch wallet error:", err);
+    } finally {
+    }
+  };
+
+  // Fetch Operations data
   const fetchProfits = async () => {
     try {
       setLoading(true);
@@ -70,6 +90,7 @@ export default function OperationsPage() {
     }
   };
 
+  // Submit operation data
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -102,6 +123,7 @@ export default function OperationsPage() {
         });
         fetchProfits();
         setOpen(false);
+        fetchWallet();
       } else {
         const data = await res.json();
         setError(data.error || "Failed to create profit");
@@ -135,6 +157,8 @@ export default function OperationsPage() {
     }
   };
 
+  console.log({ wallet });
+
   return (
     <div className="p-6 md:p-8 space-y-6">
       {/* Header */}
@@ -158,17 +182,19 @@ export default function OperationsPage() {
       {/* Quick Stats */}
       <div className="grid md:grid-cols-3 gap-6">
         <Card className="p-6 gap-0 bg-green-50 border-green-200">
-          <div className="text-sm font-medium text-green-700 mb-2">
-            Total Income
+          <div className="text-sm font-medium text-green-700 mb-2">Balance</div>
+          <div className="text-3xl font-bold text-green-700">
+            ৳ {wallet?.availableFund || 0}
           </div>
-          <div className="text-3xl font-bold text-green-700">৳ 150,000</div>
           <div className="text-xs text-green-600 mt-2">This month</div>
         </Card>
         <Card className="p-6 gap-0 bg-red-50 border-red-200">
           <div className="text-sm font-medium text-red-700 mb-2">
             Total Expenses
           </div>
-          <div className="text-3xl font-bold text-red-700">৳ 50,000</div>
+          <div className="text-3xl font-bold text-red-700">
+            ৳ {wallet ? wallet?.totalFund - wallet?.availableFund : 0}
+          </div>
           <div className="text-xs text-red-600 mt-2">This month</div>
         </Card>
         <Card className="p-6 gap-0 bg-blue-50 border-blue-200">

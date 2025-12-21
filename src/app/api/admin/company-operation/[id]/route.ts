@@ -1,6 +1,6 @@
 import { connectDB } from "@/lib/db";
 import { isAuth } from "@/lib/helpers";
-import { CompanyProfit } from "@/models/company-operation.model";
+import { CompanyOperation } from "@/models/company-operation.model";
 import { ProfitDistribution } from "@/models/profit-distribution.model";
 import { User } from "@/models/user.model";
 import { AnyBulkWriteOperation } from "mongoose";
@@ -23,7 +23,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         }
 
         const body = await req.json()
-        const profit = await CompanyProfit.findByIdAndUpdate(companyProfitId,{...body },{new:true, runValidators:true})
+        const profit = await CompanyOperation.findByIdAndUpdate(companyProfitId,{...body },{new:true, runValidators:true})
         console.log({profit});
         
         if ( !profit ) {
