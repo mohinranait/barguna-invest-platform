@@ -42,6 +42,7 @@ export default function OperationsPage() {
   // Modal control
   const [open, setOpen] = useState(false);
 
+  // form state
   const [formData, setFormData] = useState<IOperationRequest>({
     createdBy: user?._id as string,
     amount: 0,
@@ -50,6 +51,7 @@ export default function OperationsPage() {
     distributed: true,
   });
 
+  // fetch data on load
   useEffect(() => {
     fetchProfits();
     fetchWallet();
