@@ -29,7 +29,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         }
 
         
-        
+        // if deposit is approved then incress user balance and invested amount
         if(body?.status === 'approved'){           
             // incress balance and invested amount in deposit created user
             const user = await User.findByIdAndUpdate(deposit?.createdBy , {
