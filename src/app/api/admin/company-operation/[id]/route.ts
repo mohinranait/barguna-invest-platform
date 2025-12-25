@@ -7,12 +7,13 @@ import { AnyBulkWriteOperation } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 // Update company profit request for admin approval
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest,
+  context: { params: Promise<{ id: string }> }) {
     try {
 
         await connectDB()
 
-        const companyProfitId = await params.id;
+        const {id} = await context.params;
         const authUser = await isAuth()
         if (!authUser || authUser?.userId === "") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -23,7 +24,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         }
 
         const body = await req.json()
-        const profit = await CompanyOperation.findByIdAndUpdate(companyProfitId,{...body },{new:true, runValidators:true})
+        const profit = await CompanyOperation.findByIdAndUpdate(id,{...body },{new:true, runValidators:true})
         console.log({profit});
         
         if ( !profit ) {

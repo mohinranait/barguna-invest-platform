@@ -6,12 +6,12 @@ import { Withdrawal } from "@/models/wthdrawal.model";
 import { NextRequest, NextResponse } from "next/server";
 
 // Update withdraw request 
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
 
         await connectDB()
 
-        const withdrawId = params.id;
+        const {id} = await context.params;
        
         const authUser = await isAuth()
         if (!authUser || authUser?.userId === "") {
@@ -23,7 +23,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         }
 
         const body = await req.json()
-        const withdraw = await Withdrawal.findByIdAndUpdate(withdrawId,{...body},{new:true, runValidators:true})
+        const withdraw = await Withdrawal.findByIdAndUpdate(id,{...body},{new:true, runValidators:true})
         if ( !withdraw ) {
             return NextResponse.json({ error: "not-found" }, { status: 404 })
         }

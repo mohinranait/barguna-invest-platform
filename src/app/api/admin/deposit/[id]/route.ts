@@ -7,12 +7,12 @@ import { User } from "@/models/user.model"
 import { NextRequest, NextResponse } from "next/server"
 
 // Update deposit request for admin approval
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
 
         await connectDB()
 
-        const depositId = params.id;
+        const {id} = await context.params;
         const authUser = await isAuth()
         if (!authUser || authUser?.userId === "") {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -23,7 +23,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         }
 
         const body = await req.json()
-        const deposit = await Deposit.findByIdAndUpdate(depositId,{...body, updatedBy: authUser?.userId },{new:true, runValidators:true})
+        const deposit = await Deposit.findByIdAndUpdate(id,{...body, updatedBy: authUser?.userId },{new:true, runValidators:true})
         if ( !deposit ) {
             return NextResponse.json({ error: "not-found" }, { status: 404 })
         }

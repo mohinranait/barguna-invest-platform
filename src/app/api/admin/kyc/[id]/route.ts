@@ -4,12 +4,12 @@ import { Kyc } from "@/models/kyc.model";
 import { NextRequest, NextResponse } from "next/server";
 
 // Update kyc by KYC ID
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
 
         await connectDB()
 
-        const kycId = params.id;
+        const {id} = await context.params;
        
 
         const authUser = await isAuth()
@@ -22,7 +22,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         }
 
         const body = await req.json()
-        const kyc = await Kyc.findByIdAndUpdate(kycId,{...body},{new:true, runValidators:true})
+        const kyc = await Kyc.findByIdAndUpdate(id,{...body},{new:true, runValidators:true})
 
         return NextResponse.json(
             {

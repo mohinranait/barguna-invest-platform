@@ -4,12 +4,12 @@ import { Transaction } from "@/models/transaction.model"
 import { NextRequest, NextResponse } from "next/server"
 
 // Update withdraw request -> transaction
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(req: NextRequest, context: { params: Promise<{ id: string }> }) {
     try {
 
         await connectDB()
 
-        const transId = params.id;
+        const {id} = await context.params;
        
 
         const authUser = await isAuth()
@@ -22,7 +22,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         }
 
         const body = await req.json()
-        const transaction = await Transaction.findByIdAndUpdate(transId,{...body},{new:true, runValidators:true})
+        const transaction = await Transaction.findByIdAndUpdate(id,{...body},{new:true, runValidators:true})
 
         return NextResponse.json(
             {
