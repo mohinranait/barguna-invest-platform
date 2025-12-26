@@ -3,6 +3,7 @@ import { isAuth } from "@/lib/helpers"
 import { User } from "@/models/user.model"
 import { type NextRequest, NextResponse } from "next/server"
 
+// Get profile information for authenticated user
 export async function GET(req: NextRequest) {
   try {
     await connectDB()
