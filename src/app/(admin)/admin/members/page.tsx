@@ -11,69 +11,38 @@ import {
   UserCheck,
   AlertCircle,
   Download,
+  X,
+  LoaderCircle,
 } from "lucide-react";
 import { IUser } from "@/types/user.type";
-
-// const members = [
-//   {
-//     id: 1,
-//     name: "Ahmed Rahman",
-//     email: "ahmed@example.com",
-//     phone: "+880 1712345678",
-//     invested: 10000,
-//     status: "Active",
-//     kyc: "Verified",
-//     joinDate: "Oct 15, 2024",
-//   },
-//   {
-//     id: 2,
-//     name: "Fatima Khan",
-//     email: "fatima@example.com",
-//     phone: "+880 1801234567",
-//     invested: 30000,
-//     status: "Active",
-//     kyc: "Verified",
-//     joinDate: "Sep 20, 2024",
-//   },
-//   {
-//     id: 3,
-//     name: "Rahman Ahmed",
-//     email: "rahman@example.com",
-//     phone: "+880 1912345678",
-//     invested: 0,
-//     status: "Pending",
-//     kyc: "Pending",
-//     joinDate: "Nov 28, 2024",
-//   },
-//   {
-//     id: 4,
-//     name: "Noor Alam",
-//     email: "noor@example.com",
-//     phone: "+880 1701234567",
-//     invested: 50000,
-//     status: "Active",
-//     kyc: "Verified",
-//     joinDate: "Aug 10, 2024",
-//   },
-//   {
-//     id: 5,
-//     name: "Sara Islam",
-//     email: "sara@example.com",
-//     phone: "+880 1611234567",
-//     invested: 5000,
-//     status: "Inactive",
-//     kyc: "Expired",
-//     joinDate: "Jun 05, 2024",
-//   },
-// ];
+import { format } from "date-fns";
+import KycModal from "@/components/shared/KycModal";
+import { IKyc } from "@/types/kyc.type";
+import { FormDataType } from "./kyc-verification/page";
 
 export default function MembersPage() {
+  const [selectedKyc, setSelectedKyc] = useState<IKyc | null>(null);
   const [members, setMembers] = useState<IUser[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [kycLoadingFetch, setKycLoadingFetch] = useState(false);
   const [selectedMember, setSelectedMember] = useState<
     (typeof members)[0] | null
   >(null);
   const [filter, setFilter] = useState("all");
+  const [formData, setFormData] = useState<FormDataType>({
+    nid: {
+      verify: true,
+      note: "",
+    },
+    passport: {
+      verify: true,
+      note: "",
+    },
+    drivingLicence: {
+      verify: true,
+      note: "",
+    },
+  });
 
   const filteredMembers = members.filter((member) => {
     const matchesSearch =
@@ -136,6 +105,33 @@ export default function MembersPage() {
     };
     fetchMembers();
   }, []);
+
+  // fetch kyc for a member
+  const fetchKyc = async (memberId: string) => {
+    setKycLoadingFetch(true);
+    try {
+      const res = await fetch(`/api/admin/members/kyc/${memberId}`, {
+        method: "GET",
+        credentials: "include",
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        const user = members.find((m) => m._id === memberId);
+        const d = {
+          ...data?.kyc,
+          userId: {
+            fullName: user?.fullName,
+            _id: memberId,
+          },
+        };
+        setSelectedKyc(d || null);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+    setKycLoadingFetch(false);
+  };
 
   return (
     <div className="p-6 md:p-8 space-y-6">
@@ -287,15 +283,16 @@ export default function MembersPage() {
       {/* Member Detail Modal */}
       {selectedMember && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 sticky top-0 bg-card border-b flex items-center justify-between">
+          <Card className="w-full max-w-2xl p-0 max-h-[90vh] gap-0 overflow-y-auto">
+            <div className="p-4 py-3 sticky top-0 bg-card border-b flex items-center justify-between">
               <h2 className="text-2xl font-bold">{selectedMember.fullName}</h2>
               <Button variant="ghost" onClick={() => setSelectedMember(null)}>
-                ✕
+                <X />
               </Button>
             </div>
 
-            <div className="p-6 space-y-6">
+            {/* Content */}
+            <div className="p-6 space-y-6 ">
               {/* Personal Info */}
               <div>
                 <h3 className="text-lg font-semibold mb-4">
@@ -320,7 +317,48 @@ export default function MembersPage() {
                     <p className="text-xs text-muted-foreground mb-1">
                       Join Date
                     </p>
-                    <p className="font-medium">{selectedMember.createdAt}</p>
+                    <p className="font-medium">
+                      {format(
+                        new Date(selectedMember.createdAt),
+                        "MMM dd, yyyy - hh:mm a"
+                      )}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-muted/30 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">Role</p>
+                    <p className="font-medium">
+                      {selectedMember.role.charAt(0).toUpperCase() +
+                        selectedMember.role.slice(1)}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-muted/30 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">Status</p>
+                    <p className="font-medium">
+                      {selectedMember.status.charAt(0).toUpperCase() +
+                        selectedMember.status.slice(1)}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-muted/30 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Date Of Birth
+                    </p>
+                    <p className="font-medium">
+                      {selectedMember?.dateOfBirth &&
+                      !isNaN(new Date(selectedMember?.dateOfBirth).getTime())
+                        ? format(
+                            new Date(selectedMember?.dateOfBirth),
+                            "MMM dd, yyyy"
+                          )
+                        : "N/A"}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-muted/30 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Address
+                    </p>
+                    <p className="font-medium">
+                      {selectedMember?.address || "N/A"}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -331,23 +369,20 @@ export default function MembersPage() {
                   Investment Information
                 </h3>
                 <div className="grid md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-green-100/30 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Balance
+                    </p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {selectedMember?.balance.toFixed(2)}
+                    </p>
+                  </div>
                   <div className="p-4 bg-primary/10 rounded">
                     <p className="text-xs text-muted-foreground mb-1">
                       Total Invested
                     </p>
                     <p className="text-2xl font-bold text-primary">
-                      ৳ {selectedMember.investedAmount.toLocaleString()}
-                    </p>
-                  </div>
-                  <div className="p-4 bg-green-100/30 rounded">
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Pool Share %
-                    </p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {((selectedMember.investedAmount / 95000) * 100).toFixed(
-                        2
-                      )}
-                      %
+                      ৳ {selectedMember?.investedAmount.toFixed(2)}
                     </p>
                   </div>
                 </div>
@@ -355,17 +390,17 @@ export default function MembersPage() {
 
               {/* Admin Actions */}
               <div className="grid md:grid-cols-2 gap-4">
-                <Button variant="outline" className="h-11 bg-transparent">
-                  Add Manual Deposit
-                </Button>
-                <Button variant="outline" className="h-11 bg-transparent">
-                  Process Withdrawal
+                <Button
+                  onClick={() => fetchKyc(selectedMember._id)}
+                  variant="outline"
+                  className="h-11 bg-transparent"
+                  disabled={kycLoadingFetch}
+                >
+                  {kycLoadingFetch && <LoaderCircle className="animate-spin" />}
+                  View KYC Documents
                 </Button>
                 <Button variant="outline" className="h-11 bg-transparent">
                   View Transaction History
-                </Button>
-                <Button variant="outline" className="h-11 bg-transparent">
-                  View KYC Documents
                 </Button>
               </div>
 
@@ -383,33 +418,25 @@ export default function MembersPage() {
                       <option>Suspended</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      KYC Status
-                    </label>
-                    <select className="w-full px-3 py-2 border border-border rounded-lg text-sm h-11">
-                      <option selected>Verified</option>
-                      <option>Pending Review</option>
-                      <option>Rejected</option>
-                    </select>
-                  </div>
+
                   <Button className="w-full bg-primary hover:bg-primary/90">
                     Save Changes
                   </Button>
                 </div>
               </div>
-
-              {/* Close Button */}
-              <Button
-                variant="outline"
-                className="w-full h-11 bg-transparent"
-                onClick={() => setSelectedMember(null)}
-              >
-                Close
-              </Button>
             </div>
           </Card>
         </div>
+      )}
+
+      {/* Document Viewer Modal */}
+      {selectedKyc && (
+        <KycModal
+          selectedKyc={selectedKyc}
+          setSelectedKyc={setSelectedKyc}
+          formData={formData}
+          setFormData={setFormData}
+        />
       )}
     </div>
   );

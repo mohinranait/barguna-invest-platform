@@ -1,5 +1,5 @@
 import React from "react";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/shared/app-sidebar";
 import AdminHeader from "@/components/shared/AdminHeader";
 import UserProvider from "@/providers/UserProvider";

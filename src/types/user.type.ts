@@ -9,7 +9,7 @@ export interface IUser {
     status: 'active' | 'pending' | 'suspended' | 'rejected';
     kycStatus: 'approved' | 'pending' | 'rejected';
     investedAmount: number;
-    dateOfBirth: Date ;
+    dateOfBirth: string ;
     address:  string;
     profitEarned: number;
     balance: number;

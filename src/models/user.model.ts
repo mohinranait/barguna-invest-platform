@@ -15,12 +15,6 @@ const userSchema = new mongoose.Schema(
     balance: { type: Number, default: 0 },
     address: { type: String },
     dateOfBirth: { type: String },
-
-    bankAccount: {
-      accountName: String,
-      accountNumber: String,
-      bankName: String,
-    },
     bkashNumber: String,
     nagadNumber: String,
 

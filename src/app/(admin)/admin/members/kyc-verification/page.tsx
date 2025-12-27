@@ -3,26 +3,10 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Clock,
-  Download,
-  FileText,
-  AlertCircle,
-  X,
-  HardDrive,
-} from "lucide-react";
+import { Clock, FileText, AlertCircle, HardDrive } from "lucide-react";
 import { IKyc } from "@/types/kyc.type";
 import { format } from "date-fns";
-import Image from "next/image";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+
 import {
   Empty,
   EmptyDescription,
@@ -30,13 +14,27 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import KycModal from "@/components/shared/KycModal";
 
+export type FormDataType = {
+  nid: {
+    verify: boolean;
+    note: string;
+  };
+  passport: {
+    verify: boolean;
+    note: string;
+  };
+  drivingLicence: {
+    verify: boolean;
+    note: string;
+  };
+};
 export default function KYCVerificationPage() {
+  const [selectedKyc, setSelectedKyc] = useState<IKyc | null>(null);
   const [kycRequests, setKycRequests] = useState<IKyc[]>([]);
-  const [selectedRequest, setSelectedRequest] = useState<IKyc | null>(null);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormDataType>({
     nid: {
       verify: true,
       note: "",
@@ -86,52 +84,7 @@ export default function KYCVerificationPage() {
 
   // handle update kyc status
   const handleUpdateKycStatus = async () => {
-    console.log({ formData });
-
-    try {
-      let data = {
-        ...selectedRequest,
-      };
-
-      if (selectedRequest?.nid) {
-        data = {
-          ...data,
-          nid: { ...selectedRequest.nid, ...formData.nid },
-        };
-      }
-      if (selectedRequest?.passport) {
-        data = {
-          ...data,
-          passport: { ...selectedRequest.passport, ...formData.passport },
-        };
-      }
-      if (selectedRequest?.drivingLicence) {
-        data = {
-          ...data,
-          drivingLicence: {
-            ...selectedRequest.drivingLicence,
-            ...formData.drivingLicence,
-          },
-        };
-      }
-
-      await fetch(`/api/admin/kyc/${selectedRequest?._id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-type": "Application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          ...data,
-          status: "Verified",
-        }),
-      });
-
-      setSelectedRequest(null);
-      fetchKycs();
-    } catch (error) {
-      console.log({ error });
-    }
+    fetchKycs();
   };
 
   return (
@@ -207,7 +160,7 @@ export default function KYCVerificationPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setSelectedRequest(req)}
+                onClick={() => setSelectedKyc(req)}
               >
                 Review Documents
               </Button>
@@ -217,155 +170,14 @@ export default function KYCVerificationPage() {
       </Card>
 
       {/* Document Viewer Modal */}
-      {selectedRequest && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-2xl gap-2 p-0">
-            {/* Header */}
-            <div className="p-4 py-3 border-b flex items-center justify-between">
-              <h2 className="font-bold text-lg">
-                {selectedRequest.userId.fullName} - KYC
-              </h2>
-              <Button variant="ghost" onClick={() => setSelectedRequest(null)}>
-                <X />
-              </Button>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 space-y-6 max-h-[60vh] overflow-y-auto">
-              {(["nid", "passport", "drivingLicence"] as const).map(
-                (doc) =>
-                  selectedRequest[doc] && (
-                    <div key={doc} className="p-5 space-y-3 border rounded-xl ">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <FileText className="text-primary" />
-                          <p className="font-semibold capitalize">{doc}</p>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          <Download size={14} /> Download
-                        </Button>
-                      </div>
-
-                      <div className="grid md:grid-cols-2 gap-4">
-                        {/* Front */}
-                        <div>
-                          <p className="text-xs mb-2 uppercase text-muted-foreground">
-                            Front
-                          </p>
-                          <div
-                            className="relative h-48 border rounded-lg bg-muted/40 cursor-zoom-in"
-                            onClick={() =>
-                              setPreviewImage(selectedRequest[doc].front)
-                            }
-                          >
-                            <Image
-                              src={selectedRequest[doc].front}
-                              fill
-                              alt="front"
-                              className="object-contain"
-                            />
-                          </div>
-                        </div>
-
-                        {/* Back */}
-                        {selectedRequest[doc].back && (
-                          <div>
-                            <p className="text-xs mb-2 uppercase text-muted-foreground">
-                              Back
-                            </p>
-                            <div
-                              className="relative h-48 border rounded-lg bg-muted/40 cursor-zoom-in"
-                              onClick={() =>
-                                setPreviewImage(selectedRequest[doc].back)
-                              }
-                            >
-                              <Image
-                                src={selectedRequest[doc].back}
-                                fill
-                                alt="back"
-                                className="object-contain"
-                              />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className="space-y-3">
-                        <Select
-                          onValueChange={(value) => {
-                            setFormData((prev) => ({
-                              ...prev,
-                              [doc]: { ...prev[doc], verify: value === "true" },
-                            }));
-                          }}
-                        >
-                          <SelectTrigger className="">
-                            <SelectValue placeholder="Select a field" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="true">Approved</SelectItem>
-                            <SelectItem value="false">Rejected</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        {!formData[doc].verify && (
-                          <div className="space-y-1">
-                            <Label>Rejected Reasone</Label>
-                            <Textarea
-                              value={formData[doc].note}
-                              onChange={(e) => {
-                                setFormData((prev) => ({
-                                  ...prev,
-                                  [doc]: { ...prev[doc], note: e.target.value },
-                                }));
-                              }}
-                              placeholder="Type rejection message..."
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="p-4 py-2 border-t flex items-center justify-between">
-              <Button type="button" onClick={handleUpdateKycStatus}>
-                Update
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Full Image Preview */}
-      {previewImage && (
-        <div
-          className="fixed inset-0 bg-black/70 z-60 flex items-center justify-center p-4"
-          onClick={() => setPreviewImage(null)}
-        >
-          <div
-            className="relative w-full max-w-5xl h-[85vh] bg-background rounded-xl p-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              className="absolute z-100 cursor-pointer top-3 right-3 p-2 rounded-full bg-muted"
-              type="button"
-              onClick={() => setPreviewImage(null)}
-            >
-              <X size={18} />
-            </button>
-
-            <div className="relative w-full h-full">
-              <Image
-                src={previewImage}
-                fill
-                alt="Preview"
-                className="object-contain"
-              />
-            </div>
-          </div>
-        </div>
+      {selectedKyc && (
+        <KycModal
+          selectedKyc={selectedKyc}
+          setSelectedKyc={setSelectedKyc}
+          formData={formData}
+          setFormData={setFormData}
+          callBack={handleUpdateKycStatus}
+        />
       )}
     </div>
   );
