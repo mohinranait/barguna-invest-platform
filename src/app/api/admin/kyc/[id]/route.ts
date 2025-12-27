@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db";
 import { isAuth } from "@/lib/helpers";
 import { Kyc } from "@/models/kyc.model";
+import { User } from "@/models/user.model";
 import { NextRequest, NextResponse } from "next/server";
 
 // Update kyc by KYC ID
@@ -21,8 +22,14 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
             return NextResponse.json({ error: "Access Forbidden" }, { status: 403 })
         }
 
+        
         const body = await req.json()
         const kyc = await Kyc.findByIdAndUpdate(id,{...body},{new:true, runValidators:true})
+
+        // If KYC is approved, update user's kycStatus
+        if(kyc.nid.verify === true ){
+            await User.findByIdAndUpdate(kyc.userId,{ kycStatus: "approved" },{ new: true, runValidators: true });
+        }
 
         return NextResponse.json(
             {

@@ -1,14 +1,5 @@
 "use client";
-import {
-  Calendar,
-  Currency,
-  History,
-  Home,
-  Inbox,
-  Search,
-  Settings,
-  Users,
-} from "lucide-react";
+import { Currency, History, Home, Inbox, Settings, Users } from "lucide-react";
 
 import {
   Sidebar,
@@ -63,6 +54,11 @@ const items = [
   {
     title: "Reports",
     url: "/admin/reports",
+    icon: Inbox,
+  },
+  {
+    title: "KYC Verifications",
+    url: "/admin/members/kyc-verification",
     icon: Inbox,
   },
 

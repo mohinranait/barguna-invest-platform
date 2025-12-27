@@ -13,12 +13,14 @@ import {
   Download,
   X,
   LoaderCircle,
+  Trash2,
 } from "lucide-react";
 import { IUser } from "@/types/user.type";
 import { format } from "date-fns";
 import KycModal from "@/components/shared/KycModal";
 import { IKyc } from "@/types/kyc.type";
 import { FormDataType } from "./kyc-verification/page";
+import Link from "next/link";
 
 export default function MembersPage() {
   const [selectedKyc, setSelectedKyc] = useState<IKyc | null>(null);
@@ -212,16 +214,19 @@ export default function MembersPage() {
                 <th className="text-left py-3 font-medium text-muted-foreground">
                   Email
                 </th>
+                <th className="text-left py-3 font-medium text-muted-foreground">
+                  Phone
+                </th>
                 <th className="text-right py-3 font-medium text-muted-foreground">
                   Invested
                 </th>
-                <th className="text-left py-3 font-medium text-muted-foreground">
+                <th className="text-center py-3 font-medium text-muted-foreground">
                   Status
                 </th>
                 <th className="text-left py-3 font-medium text-muted-foreground">
                   KYC
                 </th>
-                <th className="text-left py-3 font-medium text-muted-foreground">
+                <th className="text-left py-3 font-medium text-muted-foreground w-[110px] ">
                   Action
                 </th>
               </tr>
@@ -232,18 +237,24 @@ export default function MembersPage() {
                   key={member._id}
                   className="border-b hover:bg-muted/50 transition"
                 >
-                  <td className="py-3 font-medium">{member.fullName}</td>
-                  <td className="py-3 text-muted-foreground">{member.email}</td>
-                  <td className="py-3 text-right font-semibold">
-                    ৳ {member.investedAmount.toLocaleString()}
+                  <td className="py-3 font-medium">{member?.fullName}</td>
+                  <td className="py-3 text-muted-foreground">
+                    {member?.email}
                   </td>
-                  <td className="py-3">
+                  <td className="py-3 text-muted-foreground">
+                    {member?.phone}
+                  </td>
+                  <td className="py-3 text-right font-semibold">
+                    ৳ {member?.investedAmount.toLocaleString()}
+                  </td>
+                  <td className="py-3 text-center">
                     <span
                       className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
                         member.status
                       )}`}
                     >
-                      {member.status}
+                      {member.status.charAt(0).toUpperCase() +
+                        member.status.slice(1)}
                     </span>
                   </td>
                   <td
@@ -253,25 +264,38 @@ export default function MembersPage() {
                   >
                     {member.kycStatus === "approved" ? (
                       <div className="flex items-center gap-1">
-                        <UserCheck size={16} />
-                        {member.kycStatus}
+                        <UserCheck size={14} />
+                        {member.kycStatus.charAt(0).toUpperCase() +
+                          member.kycStatus.slice(1)}
                       </div>
                     ) : (
                       <div className="flex items-center gap-1">
-                        <AlertCircle size={16} />
-                        {member.kycStatus}
+                        <AlertCircle size={14} />
+                        {member.kycStatus.charAt(0).toUpperCase() +
+                          member.kycStatus.slice(1)}
                       </div>
                     )}
                   </td>
-                  <td className="py-3">
+                  <td className="py-3 gap-2 flex items-center">
                     <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       onClick={() => setSelectedMember(member)}
                       className="gap-1"
+                      type="button"
                     >
                       <Eye size={16} /> View
                     </Button>
+                    <Link href={`/admin/members/kyc/${member?._id}`}>
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        type="button"
+                        className="gap-1"
+                      >
+                        <Trash2 size={16} /> Edit
+                      </Button>
+                    </Link>
                   </td>
                 </tr>
               ))}
@@ -350,6 +374,15 @@ export default function MembersPage() {
                             "MMM dd, yyyy"
                           )
                         : "N/A"}
+                    </p>
+                  </div>
+                  <div className="p-3 bg-muted/30 rounded">
+                    <p className="text-xs text-muted-foreground mb-1">
+                      KYC Status
+                    </p>
+                    <p className="font-medium">
+                      {selectedMember?.kycStatus?.charAt(0).toUpperCase() +
+                        selectedMember?.kycStatus?.slice(1) || "N/A"}
                     </p>
                   </div>
                   <div className="p-3 bg-muted/30 rounded">
