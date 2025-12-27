@@ -105,13 +105,18 @@ export default function OperationsPage() {
 
     try {
       setSubmitting(true);
+      const data = {
+        ...formData,
+        createdBy: user?._id,
+        type: formData.type === "running" ? false : formData.type,
+      };
       const res = await fetch("/api/admin/company-operation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ ...formData, createdBy: user?._id }),
+        body: JSON.stringify(data),
       });
 
       if (res.ok) {
@@ -159,8 +164,6 @@ export default function OperationsPage() {
     }
   };
 
-  console.log({ wallet });
-
   return (
     <div className="p-6 md:p-8 space-y-6">
       {/* Header */}
@@ -189,24 +192,6 @@ export default function OperationsPage() {
             ৳ {wallet?.availableFund || 0}
           </div>
           <div className="text-xs text-green-600 mt-2">This month</div>
-        </Card>
-        <Card className="p-6 gap-0 bg-red-50 border-red-200">
-          <div className="text-sm font-medium text-red-700 mb-2">
-            Total Expenses
-          </div>
-          <div className="text-3xl font-bold text-red-700">
-            ৳ {wallet ? wallet?.totalFund - wallet?.availableFund : 0}
-          </div>
-          <div className="text-xs text-red-600 mt-2">This month</div>
-        </Card>
-        <Card className="p-6 gap-0 bg-blue-50 border-blue-200">
-          <div className="text-sm font-medium text-blue-700 mb-2">
-            Net Profit
-          </div>
-          <div className="text-3xl font-bold text-blue-700">৳ 100,000</div>
-          <div className="text-xs text-blue-600 mt-2">
-            Available to distribute
-          </div>
         </Card>
       </div>
 
@@ -300,6 +285,7 @@ export default function OperationsPage() {
                   }));
                 }}
                 className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
+                disabled={formData?.type === "running"}
               />
               <div className="grid gap-1.5 font-normal">
                 <p className="text-sm leading-none font-medium">
@@ -368,7 +354,7 @@ export default function OperationsPage() {
                     </td>
                     <td className="py-3">{op.note}</td>
                     <td
-                      className={`py-3 text-right font-semibold ${
+                      className={`py-3 text-right font-semibold  ${
                         op.type === "profit" ? "text-green-600" : "text-red-600"
                       }`}
                     >
