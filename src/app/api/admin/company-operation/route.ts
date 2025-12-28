@@ -135,6 +135,9 @@ export async function GET(req: NextRequest) {
     const profits = await CompanyOperation.find(query).populate({
       path:"createdBy",
       select: 'fullName phone email'
+    }).populate({
+      path:"updatedBy",
+      select: 'fullName phone email'
     }).lean()
 
     if (!profits) {

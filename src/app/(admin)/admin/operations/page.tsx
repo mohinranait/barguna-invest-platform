@@ -30,6 +30,7 @@ import {
 } from "@/types/company-operation.type";
 import { IWallet } from "@/types/wallet.type";
 import { Textarea } from "@/components/ui/textarea";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 
 export default function OperationsPage() {
   const { user } = useUser();
@@ -92,6 +93,8 @@ export default function OperationsPage() {
       setLoading(false);
     }
   };
+
+  console.log({ profits });
 
   // Submit operation data
   const handleSubmit = async (e: React.FormEvent) => {
@@ -309,7 +312,9 @@ export default function OperationsPage() {
       <Card className="p-6 gap-0">
         <h2 className="text-lg font-semibold mb-4">Recent Operations</h2>
         {loading ? (
-          "Loading..."
+          <div className="flex justify-center py-12">
+            <LoadingSpinner />
+          </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -321,11 +326,17 @@ export default function OperationsPage() {
                   <th className="text-left py-3 font-medium text-muted-foreground">
                     Note
                   </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
-                    Amount
+                  <th className="text-left py-3 font-medium text-muted-foreground">
+                    Created By
+                  </th>
+                  <th className="text-left py-3 font-medium text-muted-foreground">
+                    Updated By
                   </th>
                   <th className="text-right py-3 font-medium text-muted-foreground">
                     Date
+                  </th>
+                  <th className="text-right py-3 font-medium text-muted-foreground">
+                    Amount
                   </th>
                 </tr>
               </thead>
@@ -348,15 +359,26 @@ export default function OperationsPage() {
                       </div>
                     </td>
                     <td className="py-3">{op.note}</td>
+
+                    <td className="py-3  text-muted-foreground">
+                      <p>{op.createdBy?.fullName || "Unknown"}</p>
+                      <p className="text-xs">{op.createdBy?.phone || "N/A"}</p>
+                      <p className="text-xs">{op.createdBy?.email || "N/A"}</p>
+                    </td>
+                    <td className="py-3  text-muted-foreground">
+                      {op.updatedBy?.fullName || "Unknown"}
+                      <p className="text-xs">{op.updatedBy?.phone || "N/A"}</p>
+                      <p className="text-xs">{op.updatedBy?.email || "N/A"}</p>
+                    </td>
+                    <td className="py-3 text-right text-muted-foreground">
+                      {format(new Date(op.createdAt), "MMM dd, yyyy")}
+                    </td>
                     <td
                       className={`py-3 text-right font-semibold  ${
                         op.type === "income" ? "text-green-600" : "text-red-600"
                       }`}
                     >
                       {op.type === "income" ? "+" : "-"}৳ {op.amount}
-                    </td>
-                    <td className="py-3 text-right text-muted-foreground">
-                      {format(new Date(op.createdAt), "MMM dd, yyyy")}
                     </td>
                   </tr>
                 ))}
