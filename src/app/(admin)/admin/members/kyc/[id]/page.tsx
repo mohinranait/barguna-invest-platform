@@ -1,6 +1,7 @@
 "use client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Card,
   CardContent,
@@ -10,6 +11,11 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -25,10 +31,13 @@ import {
   TUserRole,
   TUserStatus,
 } from "@/types/user.type";
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import React, { useState } from "react";
+import { format } from "date-fns";
+import { AlertCircle, CalendarIcon, CheckCircle2, Loader2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
+  console.log({ id: params.id });
+
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{
@@ -47,7 +56,7 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
     profitEarned: 0,
     balance: 0,
     address: "",
-    dateOfBirth: "",
+    dateOfBirth: null,
   });
 
   const handleInputChange = (field: keyof IUser, value: string | number) => {
@@ -86,6 +95,38 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
       setSubmitting(false);
     }
   };
+
+  const fetchUserData = async (id: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/admin/members/${id}`);
+      if (response.ok) {
+        const data: IUser = await response.json();
+        setFormData({
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone,
+          role: data.role,
+          status: data.status,
+          kycStatus: data.kycStatus,
+          investedAmount: data.investedAmount,
+          withdrawAmount: data.withdrawAmount,
+          profitEarned: data.profitEarned,
+          balance: data.balance,
+          address: data.address,
+          dateOfBirth: data.dateOfBirth,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData(params.id);
+  }, [params.id]);
 
   return (
     <main className="min-h-screen bg-background p-6">
@@ -149,14 +190,32 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                    <Input
-                      id="dateOfBirth"
-                      type="date"
-                      value={formData.dateOfBirth || ""}
-                      onChange={(e) =>
-                        handleInputChange("dateOfBirth", e.target.value)
-                      }
-                    />
+
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                        >
+                          <CalendarIcon className="mr-2" />
+                          {formData.dateOfBirth
+                            ? format(formData.dateOfBirth, "PPP")
+                            : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="p-0">
+                        <Calendar
+                          mode="single"
+                          selected={formData.dateOfBirth as Date}
+                          onSelect={(date) =>
+                            setFormData((p) => ({
+                              ...p,
+                              dateOfBirth: date as Date,
+                            }))
+                          }
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 </div>
                 <div className="space-y-2">

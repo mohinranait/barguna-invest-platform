@@ -13,7 +13,7 @@ export interface IUserRequest {
     investedAmount: number;
     withdrawAmount: number;
     profitEarned: number;
-    dateOfBirth: string ;
+    dateOfBirth:  Date | null ;
     address:  string;
 }
 
