@@ -3,6 +3,7 @@ import mongoose, { models, Types } from "mongoose"
 const transactionSchema = new mongoose.Schema(
   {
     createdBy: { type: Types.ObjectId, ref:"User", required:true },
+    ownerBy: { type: Types.ObjectId, ref:"User", required:true },
     amount: { type: Number, required: true, },
     type: {
       type: String,
@@ -10,10 +11,9 @@ const transactionSchema = new mongoose.Schema(
       default:"deposit"
     },
     referenceId: {
-      // depositId / profitId / withdrawId
-      type: Types.ObjectId, 
-      required: true,
-  },
+        // depositId / withdrawId
+        type: Types.ObjectId, 
+    },
   },
   { timestamps: true },
 )

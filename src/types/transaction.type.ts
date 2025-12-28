@@ -8,7 +8,7 @@ type BaseTransaction = {
 };
 
 export interface ITransactionForm extends BaseTransaction  {
-    createdBy: string,    
+    ownerBy: string,    
 }
 
 export type createdByUser = {
@@ -19,7 +19,7 @@ export type createdByUser = {
 }
 export interface ITransaction extends BaseTransaction  {
     _id: string,
-    createdBy: createdByUser,
+    ownerBy: createdByUser,
     createdAt: Date,
-    updatedAt: Date ,
+    updatedAt: Date,
 }

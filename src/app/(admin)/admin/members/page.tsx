@@ -436,27 +436,6 @@ export default function MembersPage() {
                   View Transaction History
                 </Button>
               </div>
-
-              {/* Status Management */}
-              <div className="p-4 bg-secondary/10 rounded border-2 border-secondary/20">
-                <h3 className="font-semibold mb-3">Update Member Status</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Account Status
-                    </label>
-                    <select className="w-full px-3 py-2 border border-border rounded-lg text-sm h-11">
-                      <option selected>Active</option>
-                      <option>Inactive</option>
-                      <option>Suspended</option>
-                    </select>
-                  </div>
-
-                  <Button className="w-full bg-primary hover:bg-primary/90">
-                    Save Changes
-                  </Button>
-                </div>
-              </div>
             </div>
           </Card>
         </div>

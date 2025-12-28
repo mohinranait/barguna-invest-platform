@@ -148,27 +148,6 @@ export default function OperationsPage() {
     }
   };
 
-  // Handle update operation
-  const handleDistributed = async (op: ICompanyOperation) => {
-    try {
-      setSubmitting(true);
-      await fetch(`/api/admin/company-operation/${op?._id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({}),
-      });
-    } catch (err) {
-      setError("An error occurred");
-      console.error("Submit error:", err);
-    } finally {
-      setSubmitting(false);
-      fetchProfits();
-    }
-  };
-
   return (
     <div className="p-6 md:p-8 space-y-6">
       {/* Header */}
@@ -200,23 +179,14 @@ export default function OperationsPage() {
           </div>
           <div className="text-xs text-green-600 mt-2">This month</div>
         </Card>
-        <Card className="p-6 gap-0 bg-green-50 border-green-200">
-          <div className="text-sm font-medium text-green-700 mb-2">
+        <Card className="p-6 gap-0  bg-primary/10 border-primary/20">
+          <div className="text-sm font-medium text-muted-foreground mb-2">
             Total Balance
           </div>
-          <div className="text-3xl font-bold text-green-700">
+          <div className="text-3xl font-bold text-primary">
             ৳ {wallet?.totalBalance || 0}
           </div>
-          <div className="text-xs text-green-600 mt-2">This month</div>
-        </Card>
-        <Card className="p-6 gap-0 bg-green-50 border-green-200">
-          <div className="text-sm font-medium text-green-700 mb-2">
-            Expose Balance
-          </div>
-          <div className="text-3xl font-bold text-green-700">
-            ৳ {(wallet?.totalBalance || 0) - (wallet?.availableBalance || 0)}
-          </div>
-          <div className="text-xs text-green-600 mt-2">This month</div>
+          <div className="text-xs text-muted-foreground mt-2">This month</div>
         </Card>
       </div>
 
@@ -332,9 +302,7 @@ export default function OperationsPage() {
                   <th className="text-left py-3 font-medium text-muted-foreground">
                     Updated By
                   </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
-                    Date
-                  </th>
+
                   <th className="text-right py-3 font-medium text-muted-foreground">
                     Amount
                   </th>
@@ -364,15 +332,25 @@ export default function OperationsPage() {
                       <p>{op.createdBy?.fullName || "Unknown"}</p>
                       <p className="text-xs">{op.createdBy?.phone || "N/A"}</p>
                       <p className="text-xs">{op.createdBy?.email || "N/A"}</p>
+                      <p className="text-xs">
+                        {format(
+                          new Date(op.updatedAt),
+                          "MMM dd, yyyy - hh:mm a"
+                        )}
+                      </p>
                     </td>
                     <td className="py-3  text-muted-foreground">
                       {op.updatedBy?.fullName || "Unknown"}
                       <p className="text-xs">{op.updatedBy?.phone || "N/A"}</p>
                       <p className="text-xs">{op.updatedBy?.email || "N/A"}</p>
+                      <p className="text-xs">
+                        {format(
+                          new Date(op.updatedAt),
+                          "MMM dd, yyyy - hh:mm a"
+                        )}
+                      </p>
                     </td>
-                    <td className="py-3 text-right text-muted-foreground">
-                      {format(new Date(op.createdAt), "MMM dd, yyyy")}
-                    </td>
+
                     <td
                       className={`py-3 text-right font-semibold  ${
                         op.type === "income" ? "text-green-600" : "text-red-600"

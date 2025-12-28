@@ -2,11 +2,12 @@ import { model, models, Schema, Types } from "mongoose"
 
 const distributionSchema = new Schema(
   {
-    createdBy: { type: Types.ObjectId, ref:"User", required:true },
-    profitId: { type: Types.ObjectId, ref:"CompanyProfit", required:true }  ,    
+    createdBy: { type: Types.ObjectId, ref:"User", required:true }, 
+    ownerBy: { type: Types.ObjectId, ref:"User", required:true }, 
     userInvestment: { type: Number, required: true, },
     userProfitAmount: { type: Number, required: true, },
-    adminNote: String,
+    totalInvested: { type: Number, required: true, },
+    ratio: { type: Number, required: true, },
   },
   { timestamps: true },
 )
