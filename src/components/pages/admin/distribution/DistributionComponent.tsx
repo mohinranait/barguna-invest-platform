@@ -14,8 +14,13 @@ type Props = {
 const DistributionComponent = ({ users, wallet }: Props) => {
   const [showPreview, setShowPreview] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const availableBalance = Math.max(
+    0,
+    wallet?.availableBalance - wallet?.totalBalance
+  );
+
   const [totalProfit, setTotalProfit] = useState(
-    wallet?.availableBalance?.toString() || ""
+    availableBalance?.toString() || ""
   );
 
   const totalInvested = users.reduce((sum, m) => sum + m.balance, 0);
@@ -78,13 +83,15 @@ const DistributionComponent = ({ users, wallet }: Props) => {
                 value={totalProfit}
                 onChange={(e) => setTotalProfit(e.target.value)}
                 className="flex-1 h-12 text-lg"
+                min={0}
               />
               <Button
                 onClick={handleDistribute}
                 className="bg-primary hover:bg-primary/90 px-8"
                 disabled={
                   !totalProfit ||
-                  Number.parseFloat(totalProfit) > wallet?.availableBalance
+                  Number.parseFloat(totalProfit) >
+                    wallet?.availableBalance - wallet?.totalBalance
                 }
               >
                 Calculate Distribution

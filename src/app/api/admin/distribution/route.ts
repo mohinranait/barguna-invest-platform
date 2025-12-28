@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db";
 import { isAuth } from "@/lib/helpers";
+import { CompanyWallet } from "@/models/CompanyWallet.model";
 import { ProfitDistribution } from "@/models/profit-distribution.model";
 import { Transaction } from "@/models/transaction.model";
 import { User } from "@/models/user.model";
@@ -100,6 +101,21 @@ export async function POST(req: NextRequest) {
         await User.bulkWrite(userOps);
         await ProfitDistribution.bulkWrite(profitOps);
         await Transaction.bulkWrite(transactionOps);
+
+
+        // Update company wallet total balance
+        const wallet = await CompanyWallet.findOneAndUpdate({},{
+            $inc: {
+                totalBalance: body.amount,
+            }
+        },{new :true, runValidators:true})
+
+        return NextResponse.json(
+            {
+                wallet
+            },
+            { status: 200 },
+        )
         
 
     } catch (error) {

@@ -83,21 +83,6 @@ export default function DepositVerificationPage() {
         setSelectedDeposit(null);
         setRejectionReason("");
         fetchPendingDeposits();
-
-        // Create new transaction
-        await fetch(`/api/admin/transactions`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({
-            createdBy: user?._id,
-            amount: selectedDeposit?.amount,
-            type: "deposit",
-            referenceId: data?.deposit?._id,
-          }),
-        });
       } else {
         setError(data.error || "Failed to process deposit");
       }

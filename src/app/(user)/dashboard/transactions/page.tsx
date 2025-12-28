@@ -131,7 +131,7 @@ export default function InvestmentsPage() {
                         <td
                           className={cn(
                             "py-3 font-semibold",
-                            inv.type === "deposit"
+                            inv.type === "deposit" || inv.type === "profit"
                               ? "text-green-600"
                               : "text-red-600"
                           )}

@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
     }
 
     const query = {
-        createdBy: authUser.userId
+        ownerBy: authUser.userId
     }
 
     const transactions = await Transaction.find(query).lean()

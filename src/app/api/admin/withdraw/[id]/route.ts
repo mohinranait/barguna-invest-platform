@@ -51,7 +51,8 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
 
             // Create transaction
             await Transaction.create({
-                createdBy: user?._id,
+                createdBy: authUser?.userId,
+                ownerBy: user?._id,
                 amount: withdraw?.amount,
                 type: "withdraw",
                 referenceId: withdraw?._id,

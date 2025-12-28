@@ -17,6 +17,11 @@ export default async function ProfitDistributionPage() {
   const getWallet = await CompanyWallet.findOne({});
   const wallet: IWallet = JSON.parse(JSON.stringify(getWallet));
 
+  const availableBalance = Math.max(
+    0,
+    wallet?.availableBalance - wallet?.totalBalance
+  );
+
   return (
     <div className="p-6 md:p-8 space-y-6">
       {/* Header */}
@@ -33,7 +38,7 @@ export default async function ProfitDistributionPage() {
           <div className="text-sm font-medium text-muted-foreground mb-1">
             Available balance for share
           </div>
-          <div className="text-3xl font-bold">৳ {wallet?.availableBalance}</div>
+          <div className="text-3xl font-bold">৳ {availableBalance || 0}</div>
         </Card>
         <Card className="p-4 gap-0">
           <div className="text-sm font-medium text-muted-foreground mb-1">

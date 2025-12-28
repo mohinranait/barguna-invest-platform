@@ -172,12 +172,11 @@ export default function OperationsPage() {
       <div className="grid md:grid-cols-3 gap-6">
         <Card className="p-6 gap-0 bg-green-50 border-green-200">
           <div className="text-sm font-medium text-green-700 mb-2">
-            Available Balance
+            Available Balance for investment
           </div>
           <div className="text-3xl font-bold text-green-700">
             ৳ {wallet?.availableBalance || 0}
           </div>
-          <div className="text-xs text-green-600 mt-2">This month</div>
         </Card>
         <Card className="p-6 gap-0  bg-primary/10 border-primary/20">
           <div className="text-sm font-medium text-muted-foreground mb-2">
@@ -186,7 +185,6 @@ export default function OperationsPage() {
           <div className="text-3xl font-bold text-primary">
             ৳ {wallet?.totalBalance || 0}
           </div>
-          <div className="text-xs text-muted-foreground mt-2">This month</div>
         </Card>
       </div>
 
