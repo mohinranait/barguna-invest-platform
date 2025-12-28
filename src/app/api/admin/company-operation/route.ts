@@ -31,86 +31,73 @@ export async function POST(req:NextRequest) {
             return NextResponse.json({ error: "Not created" }, { status: 401 })
         }
 
-
-        // for compnay invest block
-        if(body?.type !== 'loss'){
-            await CompanyWallet.findOneAndUpdate({},{
-                $inc: {
-                    availableFund: body?.type === 'running' ? -profit?.amount : profit?.amount ,
-                    investedFund: body?.type === 'running' ? profit?.amount : 0
-               }
-            },{new :true, runValidators:true})
-        }
         
 
         // Share company profit or loss
-        if(body?.distributed && body?.type !== 'running'){
+        // if(body?.distributed && body?.type !== 'running'){
            
-            // get all users
-            const users = await User.find({}).select('balance profitEarned').lean();
+        //     // get all users
+        //     const users = await User.find({}).select('balance profitEarned').lean();
 
-            if (users.length === 0) {
-                return NextResponse.json({ error: "No users found" }, { status: 404 });
-            }
+        //     if (users.length === 0) {
+        //         return NextResponse.json({ error: "No users found" }, { status: 404 });
+        //     }
 
-            // Sum all user blance
-            const totalInvested = users.reduce((acc, user) => acc + (user.balance || 0), 0);
-            if (totalInvested <= 0) {
-                return NextResponse.json({ error: "Invalid total invested" }, { status: 400 });
-            }
+        //     // Sum all user blance
+        //     const totalInvested = users.reduce((acc, user) => acc + (user.balance || 0), 0);
+        //     if (totalInvested <= 0) {
+        //         return NextResponse.json({ error: "Invalid total invested" }, { status: 400 });
+        //     }
 
-            const userOps : AnyBulkWriteOperation[]  = [];
-            const profitOps : AnyBulkWriteOperation[]  = [];
+        //     const userOps : AnyBulkWriteOperation[]  = [];
+        //     const profitOps : AnyBulkWriteOperation[]  = [];
 
 
-            users?.forEach( async user => {
+        //     users?.forEach( async user => {
                
-                // User balance
-                const userInvestment = user.balance || 0;
-                // Investment percentage
-                const percent = userInvestment / totalInvested;
-                // User profit amount
-                const userProfit = percent * body.amount;
+        //         // User balance
+        //         const userInvestment = user.balance || 0;
+        //         // Investment percentage
+        //         const percent = userInvestment / totalInvested;
+        //         // User profit amount
+        //         const userProfit = percent * body.amount;
                 
-                userOps.push({
-                    updateOne:{
-                        filter: {_id: user?._id },
-                        update: {
-                            $inc: {
-                                profitEarned: profit?.type === 'profit' ?  userProfit: -userProfit ,
-                                balance: profit?.type === 'profit' ?  userProfit: -userProfit 
-                            }
-                        }
-                    }
-                })
+        //         userOps.push({
+        //             updateOne:{
+        //                 filter: {_id: user?._id },
+        //                 update: {
+        //                     $inc: {
+        //                         profitEarned: profit?.type === 'profit' ?  userProfit: -userProfit ,
+        //                         balance: profit?.type === 'profit' ?  userProfit: -userProfit 
+        //                     }
+        //                 }
+        //             }
+        //         })
              
 
-                profitOps.push({
-                    insertOne:{
-                        document: {
-                            createdBy: authUser.userId,
-                            profitId: profit._id ,
-                            userInvestment ,
-                            userProfitAmount: userProfit,
-                            adminNote: "",
-                        }
-                    }
-                })
-            })
+        //         profitOps.push({
+        //             insertOne:{
+        //                 document: {
+        //                     createdBy: authUser.userId,
+        //                     profitId: profit._id ,
+        //                     userInvestment ,
+        //                     userProfitAmount: userProfit,
+        //                     adminNote: "",
+        //                 }
+        //             }
+        //         })
+        //     })
 
-            await User.bulkWrite(userOps);
-            await ProfitDistribution.bulkWrite(profitOps);
-            
-
-             await CompanyWallet.findOneAndUpdate({},{
-                $inc: {
-                    availableFund: body?.type === 'loss' ? -profit?.amount : profit?.amount ,
-               }
-            },{new :true, runValidators:true})
+        //     await User.bulkWrite(userOps);
+        //     await ProfitDistribution.bulkWrite(profitOps);
+        // }
 
 
-
-        }
+        await CompanyWallet.findOneAndUpdate({},{
+            $inc: {
+                availableBalance: body?.type === 'income' ? profit?.amount : -profit?.amount,
+            }
+        },{new :true, runValidators:true})
 
         return NextResponse.json(
             {

@@ -32,3 +32,36 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
         return NextResponse.json({ error: "Failed to fetch user data" }, { status: 500 });
     }
 }
+
+// Update user information
+export async function PATCH(req:NextRequest,context:{params: Promise<{id:string}> }){
+    try {
+        const {id:userId} = await context.params;
+
+        // Checked authentication and authorization
+        const authUser = await isAuth()
+        if (!authUser || authUser?.userId === "") {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+        }
+    
+        // Only admin and manager can access this route
+        if (!authUser || (authUser.role !== "admin" && authUser.role !== "manager")) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+        }
+
+        // Connect to DB and fetch user by userId
+        await connectDB();
+
+        const body = await req.json();
+        const user = await User.findByIdAndUpdate(userId, {...body},{new:true, runValidators:true})
+
+        if (!user) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+        return NextResponse.json(user, { status: 200 });
+
+    } catch (error) {
+        console.log(error);
+        return NextResponse.json({ error: "Failed to fetch user data" }, { status: 500 });
+    }
+}

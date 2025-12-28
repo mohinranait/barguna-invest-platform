@@ -44,8 +44,8 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
 
             await CompanyWallet.findOneAndUpdate({},{
                 $inc: {
-                    totalFund: deposit?.amount,
-                    availableFund: deposit?.amount,
+                    totalBalance: deposit?.amount,
+                    availableBalance: deposit?.amount,
                }
             },{new:true, runValidators:true, upsert:true,})
 

@@ -1,5 +1,6 @@
 import { connectDB } from "@/lib/db";
 import { isAuth } from "@/lib/helpers";
+import { CompanyWallet } from "@/models/CompanyWallet.model";
 import { Transaction } from "@/models/transaction.model";
 import { User } from "@/models/user.model";
 import { Withdrawal } from "@/models/wthdrawal.model";
@@ -40,6 +41,13 @@ export async function PATCH(req: NextRequest, context: { params: Promise<{ id: s
                 return NextResponse.json({ error: "not-found" }, { status: 404 })
             }
 
+            await CompanyWallet.findOneAndUpdate({},{
+                $inc: {
+                    totalBalance: -withdraw?.amount,
+                    availableBalance: -withdraw?.amount,
+                }
+            },{new:true, runValidators:true, upsert:true,})
+            
 
             // Create transaction
             await Transaction.create({

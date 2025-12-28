@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import LoadingSpinner from "@/components/ui/loading-spinner";
 import {
   Popover,
   PopoverContent,
@@ -72,9 +73,10 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
     setMessage(null);
 
     try {
-      const response = await fetch(`/api/admin/users/${params.id}`, {
-        method: "PUT",
+      const response = await fetch(`/api/admin/members/${params.id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(formData),
       });
 
@@ -154,7 +156,9 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
               ) : (
                 <AlertCircle className="h-4 w-4 text-red-500" />
               )}
-              <AlertDescription>{message.text}</AlertDescription>
+              <AlertDescription className="text-nowrap">
+                {message.text}
+              </AlertDescription>
             </div>
           </Alert>
         )}
@@ -175,61 +179,67 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
                 <CardTitle>Personal Information</CardTitle>
                 <CardDescription>Update basic user information</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {loading ? (
+                <div className="flex justify-center py-12">
+                  <LoadingSpinner />
+                </div>
+              ) : (
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="fullName">Full Name</Label>
+                      <Input
+                        id="fullName"
+                        value={formData.fullName || ""}
+                        onChange={(e) =>
+                          handleInputChange("fullName", e.target.value)
+                        }
+                        placeholder="Enter full name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="dateOfBirth">Date of Birth</Label>
+
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                          >
+                            <CalendarIcon className="mr-2" />
+                            {formData.dateOfBirth
+                              ? format(formData.dateOfBirth, "PPP")
+                              : "Pick a date"}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="p-0">
+                          <Calendar
+                            mode="single"
+                            selected={formData.dateOfBirth as Date}
+                            onSelect={(date) =>
+                              setFormData((p) => ({
+                                ...p,
+                                dateOfBirth: date as Date,
+                              }))
+                            }
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                  </div>
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
+                    <Label htmlFor="address">Address</Label>
                     <Input
-                      id="fullName"
-                      value={formData.fullName || ""}
+                      id="address"
+                      value={formData.address || ""}
                       onChange={(e) =>
-                        handleInputChange("fullName", e.target.value)
+                        handleInputChange("address", e.target.value)
                       }
-                      placeholder="Enter full name"
+                      placeholder="Enter address"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
-
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full justify-start"
-                        >
-                          <CalendarIcon className="mr-2" />
-                          {formData.dateOfBirth
-                            ? format(formData.dateOfBirth, "PPP")
-                            : "Pick a date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="p-0">
-                        <Calendar
-                          mode="single"
-                          selected={formData.dateOfBirth as Date}
-                          onSelect={(date) =>
-                            setFormData((p) => ({
-                              ...p,
-                              dateOfBirth: date as Date,
-                            }))
-                          }
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    value={formData.address || ""}
-                    onChange={(e) =>
-                      handleInputChange("address", e.target.value)
-                    }
-                    placeholder="Enter address"
-                  />
-                </div>
-              </CardContent>
+                </CardContent>
+              )}
             </Card>
           </TabsContent>
 

@@ -1,17 +1,17 @@
 
-export type TOperationType  = 'profit' | "running" | "loss" ;
+export type TOperationType  = 'income' | "expose"  ;
 
 // Base Deposit type
 type BaseOperation = {
     amount: number;
     type: TOperationType;
     note: string;
-    distributed: boolean;
 }
 
 // This type for form
 export interface IOperationRequest extends BaseOperation {
      createdBy: string;
+     updatedBy: string;
 }
 
 export type CreatedByUser = {
@@ -26,8 +26,8 @@ export interface ICompanyOperation  extends BaseOperation
 {
     _id: string;
     createdBy: CreatedByUser;
+    updatedBy: CreatedByUser;
     note: string;
-    updatedBy: string;
     createdAt: Date;
     updatedAt: Date;
 }

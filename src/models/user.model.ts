@@ -17,10 +17,7 @@ const userSchema = new mongoose.Schema(
     dateOfBirth: { type: String },
     bkashNumber: String,
     nagadNumber: String,
-
     verifiedAt: Date,
-
-    
   },
   { timestamps: true },
 )

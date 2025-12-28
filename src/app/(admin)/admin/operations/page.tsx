@@ -29,6 +29,7 @@ import {
   IOperationRequest,
 } from "@/types/company-operation.type";
 import { IWallet } from "@/types/wallet.type";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function OperationsPage() {
   const { user } = useUser();
@@ -45,10 +46,10 @@ export default function OperationsPage() {
   // form state
   const [formData, setFormData] = useState<IOperationRequest>({
     createdBy: user?._id as string,
+    updatedBy: user?._id as string,
     amount: 0,
-    type: "profit",
+    type: "income",
     note: "",
-    distributed: true,
   });
 
   // fetch data on load
@@ -108,7 +109,8 @@ export default function OperationsPage() {
       const data = {
         ...formData,
         createdBy: user?._id,
-        type: formData.type === "running" ? false : formData.type,
+        updatedBy: user?._id,
+        type: formData.type,
       };
       const res = await fetch("/api/admin/company-operation", {
         method: "POST",
@@ -123,10 +125,10 @@ export default function OperationsPage() {
         setMessage("Request submitted successfully!");
         setFormData({
           createdBy: user?._id as string,
+          updatedBy: user?._id as string,
           amount: 0,
-          type: "profit",
+          type: "income",
           note: "",
-          distributed: false,
         });
         fetchProfits();
         setOpen(false);
@@ -143,7 +145,7 @@ export default function OperationsPage() {
     }
   };
 
-  // Handle distributed from table action button
+  // Handle update operation
   const handleDistributed = async (op: ICompanyOperation) => {
     try {
       setSubmitting(true);
@@ -153,7 +155,7 @@ export default function OperationsPage() {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify({ distributed: true }),
+        body: JSON.stringify({}),
       });
     } catch (err) {
       setError("An error occurred");
@@ -187,9 +189,29 @@ export default function OperationsPage() {
       {/* Quick Stats */}
       <div className="grid md:grid-cols-3 gap-6">
         <Card className="p-6 gap-0 bg-green-50 border-green-200">
-          <div className="text-sm font-medium text-green-700 mb-2">Balance</div>
+          <div className="text-sm font-medium text-green-700 mb-2">
+            Available Balance
+          </div>
           <div className="text-3xl font-bold text-green-700">
-            ৳ {wallet?.availableFund || 0}
+            ৳ {wallet?.availableBalance || 0}
+          </div>
+          <div className="text-xs text-green-600 mt-2">This month</div>
+        </Card>
+        <Card className="p-6 gap-0 bg-green-50 border-green-200">
+          <div className="text-sm font-medium text-green-700 mb-2">
+            Total Balance
+          </div>
+          <div className="text-3xl font-bold text-green-700">
+            ৳ {wallet?.totalBalance || 0}
+          </div>
+          <div className="text-xs text-green-600 mt-2">This month</div>
+        </Card>
+        <Card className="p-6 gap-0 bg-green-50 border-green-200">
+          <div className="text-sm font-medium text-green-700 mb-2">
+            Expose Balance
+          </div>
+          <div className="text-3xl font-bold text-green-700">
+            ৳ {(wallet?.totalBalance || 0) - (wallet?.availableBalance || 0)}
           </div>
           <div className="text-xs text-green-600 mt-2">This month</div>
         </Card>
@@ -223,12 +245,12 @@ export default function OperationsPage() {
             <div>
               <label className="block text-sm font-medium mb-2">Type</label>
               <Select
-                defaultValue="increase"
+                defaultValue="income"
                 value={formData.type}
                 onValueChange={(value) =>
                   setFormData({
                     ...formData,
-                    type: value as "profit" | "loss" | "running",
+                    type: value as "income" | "expose",
                   })
                 }
               >
@@ -236,9 +258,8 @@ export default function OperationsPage() {
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="running">Current Invest </SelectItem>
-                  <SelectItem value="profit">Business Profit</SelectItem>
-                  <SelectItem value="loss">Business Loss</SelectItem>
+                  <SelectItem value="income">Income Balance</SelectItem>
+                  <SelectItem value="expose">Expose Balance</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -264,38 +285,15 @@ export default function OperationsPage() {
               <label className="block text-sm font-medium mb-2">
                 Description
               </label>
-              <Input
+
+              <Textarea
                 value={formData.note}
                 onChange={(e) =>
                   setFormData({ ...formData, note: e.target.value })
                 }
                 placeholder="Enter description"
-                className="h-11"
               />
             </div>
-
-            <Label className="hover:bg-accent/50 flex items-start gap-3 rounded-lg border p-3 ">
-              <Checkbox
-                id="toggle-2"
-                defaultChecked={formData?.distributed}
-                onCheckedChange={(e) => {
-                  setFormData((prev) => ({
-                    ...prev,
-                    distributed: e as boolean,
-                  }));
-                }}
-                className="data-[state=checked]:border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white dark:data-[state=checked]:border-blue-700 dark:data-[state=checked]:bg-blue-700"
-                disabled={formData?.type === "running"}
-              />
-              <div className="grid gap-1.5 font-normal">
-                <p className="text-sm leading-none font-medium">
-                  Enable notifications
-                </p>
-                <p className="text-muted-foreground text-sm">
-                  You can enable or disable notifications at any time.
-                </p>
-              </div>
-            </Label>
 
             <DialogFooter>
               <Button type="submit" disabled={submitting}>
@@ -329,9 +327,6 @@ export default function OperationsPage() {
                   <th className="text-right py-3 font-medium text-muted-foreground">
                     Date
                   </th>
-                  <th className="text-right py-3 font-medium text-muted-foreground">
-                    Distribut
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -342,12 +337,12 @@ export default function OperationsPage() {
                   >
                     <td className="py-3">
                       <div className="flex items-center gap-2">
-                        {op.type === "profit" ? (
+                        {op.type === "income" ? (
                           <Plus className="text-green-600" size={16} />
                         ) : (
                           <Minus className="text-red-600" size={16} />
                         )}
-                        {op.type === "profit"
+                        {op.type === "income"
                           ? "Business Income"
                           : "Business Expense"}
                       </div>
@@ -355,24 +350,13 @@ export default function OperationsPage() {
                     <td className="py-3">{op.note}</td>
                     <td
                       className={`py-3 text-right font-semibold  ${
-                        op.type === "profit" ? "text-green-600" : "text-red-600"
+                        op.type === "income" ? "text-green-600" : "text-red-600"
                       }`}
                     >
-                      {op.type === "profit" ? "+" : "-"}৳ {op.amount}
+                      {op.type === "income" ? "+" : "-"}৳ {op.amount}
                     </td>
                     <td className="py-3 text-right text-muted-foreground">
                       {format(new Date(op.createdAt), "MMM dd, yyyy")}
-                    </td>
-                    <td className="py-3 text-right text-muted-foreground">
-                      <Button
-                        size={"sm"}
-                        className="text-xs"
-                        disabled={op.distributed}
-                        onClick={() => handleDistributed(op)}
-                        type="button"
-                      >
-                        Distribut
-                      </Button>
                     </td>
                   </tr>
                 ))}

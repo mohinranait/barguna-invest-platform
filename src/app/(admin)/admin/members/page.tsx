@@ -286,7 +286,7 @@ export default function MembersPage() {
                     >
                       <Eye size={16} /> View
                     </Button>
-                    <Link href={`/admin/members/kyc/${member?._id}`}>
+                    <Link href={`/admin/members/${member?._id}`}>
                       <Button
                         variant="secondary"
                         size="sm"

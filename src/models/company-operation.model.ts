@@ -3,15 +3,12 @@ import { model, models, Schema, Types } from "mongoose"
 const companyOperation = new Schema(
   {
     createdBy: { type: Types.ObjectId, ref:"User", required:true },
+    updatedBy: { type: Types.ObjectId, ref:"User", required:true },
     amount: { type: Number, required: true, },
     type: {
         type: String,
-        enum: ['profit',"running","loss"],
-        default: 'profit'
-    },
-    distributed: {
-      type: Boolean,
-      default:false,
+        enum: ['income',"expose",],
+        default: 'income'
     },
     note: {
         type: String,
