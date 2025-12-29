@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
         createdBy: authUser.userId
     }
 
-    const deposits = await Deposit.find(query).lean()
+    const deposits = await Deposit.find(query).sort({ createdAt: -1 }).lean()
 
     if (!deposits) {
       return NextResponse.json({ error: "Deposits not found" }, { status: 404 })

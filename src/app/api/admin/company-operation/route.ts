@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
     }).populate({
       path:"updatedBy",
       select: 'fullName phone email'
-    }).lean()
+    }).sort({ createdAt: -1 }).lean()
 
     if (!profits) {
       return NextResponse.json({ error: "Profits not found" }, { status: 404 })

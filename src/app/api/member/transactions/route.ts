@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
         ownerBy: authUser.userId
     }
 
-    const transactions = await Transaction.find(query).lean()
+    const transactions = await Transaction.find(query).sort({ createdAt: -1 }).lean()
 
     if (!transactions) {
       return NextResponse.json({ error: "Transactions not found" }, { status: 404 })

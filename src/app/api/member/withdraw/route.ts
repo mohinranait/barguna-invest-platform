@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
         createdBy: authUser.userId
     }
 
-    const withdrawals = await Withdrawal.find(query).lean()
+    const withdrawals = await Withdrawal.find(query).sort({ createdAt: -1 }).lean()
 
     if (!withdrawals) {
       return NextResponse.json({ error: "Withdraw not found" }, { status: 404 })

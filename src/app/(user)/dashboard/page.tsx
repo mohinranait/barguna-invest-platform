@@ -1,14 +1,15 @@
 "use client";
+import TransactionTable from "@/components/pages/user/transaction/TransactionTable";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import StatCard from "@/components/ui/stat-card";
-import StatusBadge from "@/components/ui/status-badge";
 import { useUser } from "@/providers/UserProvider";
+import { ITransaction } from "@/types/transaction.type";
 import { Plus, TrendingDown, TrendingUp } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   CartesianGrid,
   Cell,
@@ -22,20 +23,12 @@ import {
   YAxis,
 } from "recharts";
 
-interface Transaction {
-  _id: string;
-  type: string;
-  amount: number;
-  description: string;
-  createdAt: string;
-}
-
 const UserDashboard = () => {
   // const user: { profitEarned: number } = { profitEarned: 1000 };
   const { user } = useUser();
-  console.log({ user });
 
-  const [transactions] = useState<Transaction[]>([]);
+  const [transactionLoading, setTransactionLoading] = useState(false);
+  const [transactions, setTransactions] = useState<ITransaction[]>([]);
   const profitData = [
     { month: "Jan", profit: user?.profitEarned ? user.profitEarned * 0.3 : 0 },
     { month: "Feb", profit: user?.profitEarned ? user.profitEarned * 0.4 : 0 },
@@ -44,6 +37,31 @@ const UserDashboard = () => {
     { month: "May", profit: user?.profitEarned ? user.profitEarned * 0.7 : 0 },
     { month: "Jun", profit: user?.profitEarned ? user.profitEarned : 0 },
   ];
+
+  const fetchTransactions = async () => {
+    setTransactionLoading(true);
+    try {
+      const res = await fetch("/api/member/transactions", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to fetch transactions");
+      }
+      const data = await res.json();
+      setTransactions(data.transactions);
+    } catch (error) {
+      console.log({ error });
+    }
+    setTransactionLoading(false);
+  };
+
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
 
   return (
     <React.Fragment>
@@ -64,7 +82,7 @@ const UserDashboard = () => {
             </Link>
           </div>
           {/* KPI Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 pt-4 gap-4 lg:gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 pt-4 gap-4 lg:gap-6">
             <StatCard
               icon={<TrendingUp className="text-primary" size={24} />}
               label="Current Balance"
@@ -82,12 +100,6 @@ const UserDashboard = () => {
               value={`৳ ${user?.profitEarned.toLocaleString()}`}
               change="+12.5%"
               changeType="positive"
-            />
-
-            <StatCard
-              icon={<TrendingUp className="text-primary" size={24} />}
-              label="Pool Share"
-              value={"0%"}
             />
           </div>
         </UserContainer>
@@ -155,68 +167,7 @@ const UserDashboard = () => {
           </div>
 
           {/* Recent Transactions */}
-          <Card className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold">Recent Transactions</h2>
-              <Button variant="ghost" size="sm">
-                View All
-              </Button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Type
-                    </th>
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Amount
-                    </th>
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Date
-                    </th>
-                    <th className="text-left py-3 font-medium text-muted-foreground">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {transactions.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan={4}
-                        className="py-4 text-center text-muted-foreground"
-                      >
-                        No transactions yet
-                      </td>
-                    </tr>
-                  ) : (
-                    transactions.map((txn) => (
-                      <tr
-                        key={txn._id}
-                        className="border-b hover:bg-muted/50 transition"
-                      >
-                        <td className="py-3">{txn.type}</td>
-                        <td className="py-3 font-semibold">
-                          ৳ {txn.amount.toLocaleString()}
-                        </td>
-                        <td className="py-3 text-muted-foreground">
-                          {new Date(txn.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="py-3">
-                          <StatusBadge
-                            status={
-                              txn.type === "deposit" ? "success" : "error"
-                            }
-                          />
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </Card>
+          <TransactionTable historys={transactions} />
         </UserContainer>
       </div>
     </React.Fragment>

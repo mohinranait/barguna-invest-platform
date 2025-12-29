@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db";
 import { isAuth } from "@/lib/helpers";
 import { CompanyWallet } from "@/models/CompanyWallet.model";
+import { Distribution } from "@/models/distribution.model";
 import { ProfitDistribution } from "@/models/profit-distribution.model";
 import { Transaction } from "@/models/transaction.model";
 import { User } from "@/models/user.model";
@@ -35,6 +36,16 @@ export async function POST(req: NextRequest) {
         if (users.length === 0) {
             return NextResponse.json({ error: "No users found" }, { status: 404 });
         }
+
+
+        // Create distribution record
+        const distribution = new Distribution({
+            createdBy: authUser.userId,
+            amount: body.amount,
+            members: users.length,
+            status: "Completed",
+        })
+        await distribution.save();
 
         // Sum all user blance
         const totalInvested = users.reduce((acc, user) => acc + (user.balance || 0), 0);
@@ -81,6 +92,7 @@ export async function POST(req: NextRequest) {
                         userProfitAmount: userProfit,
                         totalInvested,
                         ratio: percent,
+                        distribution: distribution._id
                     }
                 }
             })
@@ -101,6 +113,9 @@ export async function POST(req: NextRequest) {
         await User.bulkWrite(userOps);
         await ProfitDistribution.bulkWrite(profitOps);
         await Transaction.bulkWrite(transactionOps);
+
+
+        
 
 
         // Update company wallet total balance

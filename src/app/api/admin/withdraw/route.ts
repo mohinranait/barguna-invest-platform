@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
     const withdrawals = await Withdrawal.find(query).populate({
         path:"createdBy",
         select: 'fullName email phone'
-    }).lean()
+    }).sort({ createdAt: -1 }).lean()
 
     if (!withdrawals) {
       return NextResponse.json({ error: "Withdraw not found" }, { status: 404 })

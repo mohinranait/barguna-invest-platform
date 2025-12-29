@@ -6,12 +6,17 @@ import { User } from "@/models/user.model";
 import { CompanyWallet } from "@/models/CompanyWallet.model";
 import { IUser } from "@/types/user.type";
 import { IWallet } from "@/types/wallet.type";
+import { Distribution } from "@/models/distribution.model";
+import { format } from "date-fns";
 
 export default async function ProfitDistributionPage() {
   await connectDB();
   const getAllUsers = await User.find({}).select("fullName status balance");
   const users: IUser[] = JSON.parse(JSON.stringify(getAllUsers));
   const activeUsers = users?.filter((user) => user.status === "active");
+
+  const getDistribution = await Distribution.find({}).limit(5).lean();
+  const distributions = JSON.parse(JSON.stringify(getDistribution));
 
   // Wallet info can be fetched here if needed
   const getWallet = await CompanyWallet.findOne({});
@@ -21,6 +26,8 @@ export default async function ProfitDistributionPage() {
     0,
     wallet?.availableBalance - wallet?.totalBalance
   );
+
+  console.log({ distributions });
 
   return (
     <div className="p-6 md:p-8 space-y-6">
@@ -62,6 +69,51 @@ export default async function ProfitDistributionPage() {
 
       {/* Distribution component */}
       <DistributionComponent users={users} wallet={wallet} />
+
+      {/* Distribution History */}
+      <Card className="p-6 gap-0">
+        <h2 className="text-lg font-semibold ">Recent Distributions</h2>
+        <div className="space-y-3">
+          {distributions.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              No distributions found.
+            </p>
+          )}
+          {distributions.map(
+            (
+              dist: {
+                members: number;
+                amount: number;
+                createdAt: string;
+                status: string;
+              },
+              i: number
+            ) => (
+              <div
+                key={i}
+                className="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition"
+              >
+                <div>
+                  <p className="font-medium">
+                    {format(new Date(dist.createdAt), "MMM dd, yyyy")}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Distributed to {dist.members} members
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-lg text-primary">
+                    ৳ {dist.amount}
+                  </p>
+                  <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded inline-block mt-1">
+                    {dist.status}
+                  </span>
+                </div>
+              </div>
+            )
+          )}
+        </div>
+      </Card>
     </div>
   );
 }

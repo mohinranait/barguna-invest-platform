@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
     const deposits = await Deposit.find(query).populate({
       path:"createdBy",
       select: 'fullName phone email'
-    }).lean()
+    }).sort({ createdAt: -1 }).lean()
 
     if (!deposits) {
       return NextResponse.json({ error: "Deposits not found" }, { status: 404 })
