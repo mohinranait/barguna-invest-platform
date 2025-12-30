@@ -1,6 +1,4 @@
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Download, FileText, Calendar } from "lucide-react";
 import React from "react";
 import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
@@ -8,37 +6,7 @@ import { connectDB } from "@/lib/db";
 import { Distribution } from "@/models/distribution.model";
 import { IDistribution } from "@/types/distribution.type";
 import { format } from "date-fns";
-
-const statements = [
-  {
-    month: "December 2024",
-    date: "Dec 1, 2024",
-    transactions: 12,
-    profit: "1,250",
-    status: "Ready",
-  },
-  {
-    month: "November 2024",
-    date: "Nov 1, 2024",
-    transactions: 15,
-    profit: "1,100",
-    status: "Ready",
-  },
-  {
-    month: "October 2024",
-    date: "Oct 1, 2024",
-    transactions: 10,
-    profit: "950",
-    status: "Ready",
-  },
-  {
-    month: "September 2024",
-    date: "Sep 1, 2024",
-    transactions: 18,
-    profit: "1,300",
-    status: "Ready",
-  },
-];
+import StatementLine from "@/components/shared/StatementLine";
 
 export default async function StatementsPage() {
   await connectDB();
@@ -106,47 +74,7 @@ export default async function StatementsPage() {
           {/* Statements List */}
           <Card className="p-6">
             <h2 className="text-lg font-semibold ">Available Statements</h2>
-            <div className="space-y-3">
-              {distributions.map((stmt, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition border"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="p-3 bg-primary/10 rounded-lg">
-                      <FileText className="text-primary" size={24} />
-                    </div>
-                    <div>
-                      <p className="font-semibold">
-                        {format(new Date(stmt?.createdAt), "MMMM yyyy")}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        <Calendar className="inline mr-1" size={14} />
-                        {format(new Date(stmt?.createdAt), "MMM dd, yyyy")} •
-                        Distributed to {stmt.members} members
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
-                      <p className="font-semibold text-green-600">
-                        ৳ {stmt.amount}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {stmt.status}
-                      </p>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="gap-2 bg-transparent"
-                    >
-                      <Download size={16} /> PDF
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <StatementLine />
           </Card>
         </div>
       </UserContainer>
