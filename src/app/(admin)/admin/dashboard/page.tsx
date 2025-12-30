@@ -1,44 +1,36 @@
-"use client";
-
 import { Card } from "@/components/ui/card";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
 import { Users, TrendingUp, BarChart3, PieChartIcon } from "lucide-react";
+import ProfitExpense from "@/components/pages/admin/dashboard/ProfitExpense";
+import MemberDistributionCard from "./MemberDistributionCard";
+import { User } from "@/models/user.model";
+import { connectDB } from "@/lib/db";
+import { Distribution } from "@/models/distribution.model";
+import { IDistribution } from "@/types/distribution.type";
+import { CompanyWallet } from "@/models/CompanyWallet.model";
+import { IWallet } from "@/types/wallet.type";
 
-const monthlyData = [
-  { month: "Jan", profit: 50000, expense: 20000 },
-  { month: "Feb", profit: 65000, expense: 25000 },
-  { month: "Mar", profit: 80000, expense: 30000 },
-  { month: "Apr", profit: 90000, expense: 28000 },
-  { month: "May", profit: 110000, expense: 35000 },
-  { month: "Jun", profit: 130000, expense: 40000 },
-];
+export default async function AdminDashboard() {
+  await connectDB();
+  const getUsers = await User.find({}).countDocuments();
+  const totalUsers = JSON.parse(JSON.stringify(getUsers));
 
-export default function AdminDashboard() {
+  const getDistribution = await Distribution.find({}).lean();
+  const distributionData: IDistribution[] = JSON.parse(
+    JSON.stringify(getDistribution)
+  );
+  const totalDistributedProfit = distributionData.reduce(
+    (acc, curr) => acc + curr.amount,
+    0
+  );
+
+  // wallet data
+  const getWallet = await CompanyWallet.findOne({}).lean();
+  const wallet: IWallet = JSON.parse(JSON.stringify(getWallet));
   const statsData = [
     {
-      id: 1,
-      title: "Total Members",
-      value: "348",
-      subtitle: "+12 new this month",
-      subtitleColor: "text-green-600",
-      icon: Users,
-      iconColor: "text-primary",
-    },
-    {
       id: 2,
-      title: "Total Invested",
-      value: "৳ 2,000,000",
+      title: "Balance in Wallet",
+      value: `৳ ${wallet?.availableBalance.toLocaleString()}`,
       subtitle: "From all members",
       subtitleColor: "text-muted-foreground",
       icon: TrendingUp,
@@ -47,7 +39,7 @@ export default function AdminDashboard() {
     {
       id: 3,
       title: "Profit Distributed",
-      value: "৳ 250,000",
+      value: `৳ ${totalDistributedProfit.toLocaleString()}`,
       subtitle: "12.5% average return",
       subtitleColor: "text-green-600",
       icon: BarChart3,
@@ -55,12 +47,23 @@ export default function AdminDashboard() {
     },
     {
       id: 4,
-      title: "Pool Balance",
-      value: "৳ 1,750,000",
-      subtitle: "Available for investment",
+      title: "Available balance",
+      value: `৳ ${(
+        wallet?.availableBalance - wallet.totalBalance
+      )?.toLocaleString()}`,
+      subtitle: "Available for distribution",
       subtitleColor: "text-muted-foreground",
       icon: PieChartIcon,
       iconColor: "text-secondary",
+    },
+    {
+      id: 1,
+      title: "Total Members",
+      value: totalUsers.toString(),
+      subtitle: "+12 new this month",
+      subtitleColor: "text-green-600",
+      icon: Users,
+      iconColor: "text-primary",
     },
   ];
 
@@ -98,59 +101,10 @@ export default function AdminDashboard() {
       {/* Charts */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Profit vs Expense */}
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-6">Profit vs Expense</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={monthlyData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis dataKey="month" stroke="var(--muted-foreground)" />
-              <YAxis stroke="var(--muted-foreground)" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: "var(--card)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "0.5rem",
-                }}
-              />
-              <Bar
-                dataKey="profit"
-                fill="var(--primary)"
-                radius={[8, 8, 0, 0]}
-              />
-              <Bar
-                dataKey="expense"
-                fill="var(--secondary)"
-                radius={[8, 8, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
+        <ProfitExpense />
 
         {/* Member Distribution */}
-        <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-6">Member Status</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={[
-                  { name: "Active", value: 320 },
-                  { name: "Pending KYC", value: 20 },
-                  { name: "Inactive", value: 8 },
-                ]}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={(entry) => `${entry.name}: ${entry.value}`}
-                outerRadius={100}
-                dataKey="value"
-              >
-                <Cell fill="var(--primary)" />
-                <Cell fill="var(--secondary)" />
-                <Cell fill="var(--muted)" />
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-        </Card>
+        <MemberDistributionCard />
       </div>
 
       {/* Recent Activity */}
