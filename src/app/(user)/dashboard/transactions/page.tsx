@@ -7,6 +7,7 @@ import TransactionTable from "@/components/pages/user/transaction/TransactionTab
 import { connectDB } from "@/lib/db";
 import { Transaction } from "@/models/transaction.model";
 import { ITransaction } from "@/types/transaction.type";
+import { isAuth } from "@/lib/helpers";
 
 interface PageProps {
   searchParams: {
@@ -20,13 +21,17 @@ interface PageProps {
 export default async function InvestmentsPage({ searchParams }: PageProps) {
   await connectDB();
   const { search, type, from, to } = searchParams;
+  const authUser = await isAuth();
 
   const filter: {
     type?: string;
     amount?: number;
     search?: string;
     createdAt?: { $gte?: Date; $lte?: Date };
-  } = {};
+    ownerBy?: string;
+  } = {
+    ownerBy: authUser?.userId,
+  };
 
   /* ===== Type ===== */
   if (type && type !== "all") {

@@ -1,5 +1,15 @@
 "use client";
-import { Currency, History, Home, Inbox, Settings, Users } from "lucide-react";
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  BarChart3,
+  History,
+  Home,
+  Settings,
+  ShieldCheck,
+  Users,
+  Wallet,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -22,23 +32,21 @@ const items = [
     url: "/admin/dashboard",
     icon: Home,
   },
-
   {
-    title: "Deposits Requests",
+    title: "Deposit Requests",
     url: "/admin/deposit-verification",
-    icon: Currency,
+    icon: ArrowDownToLine,
   },
   {
     title: "Withdraw Requests",
     url: "/admin/withdraw",
-    icon: Currency,
+    icon: ArrowUpFromLine,
   },
   {
     title: "Members",
     url: "/admin/members",
     icon: Users,
   },
-
   {
     title: "Operations",
     url: "/admin/operations",
@@ -47,33 +55,29 @@ const items = [
   {
     title: "Distribution",
     url: "/admin/distribution",
-    icon: Settings,
+    icon: Wallet,
   },
-
   {
     title: "Settings",
     url: "/admin/settings",
     icon: Settings,
   },
-
   {
     title: "Reports",
     url: "/admin/reports",
-    icon: Inbox,
+    icon: BarChart3,
   },
   {
     title: "KYC Verifications",
     url: "/admin/members/kyc-verification",
-    icon: Inbox,
+    icon: ShieldCheck,
   },
-
   {
-    title: "Historys",
+    title: "History",
     url: "/admin/audit-log",
     icon: History,
   },
 ];
-
 export function AppSidebar() {
   const { open } = useSidebar();
   return (

@@ -24,10 +24,8 @@ import {
 } from "recharts";
 
 const UserDashboard = () => {
-  // const user: { profitEarned: number } = { profitEarned: 1000 };
   const { user } = useUser();
 
-  const [transactionLoading, setTransactionLoading] = useState(false);
   const [transactions, setTransactions] = useState<ITransaction[]>([]);
   const profitData = [
     { month: "Jan", profit: user?.profitEarned ? user.profitEarned * 0.3 : 0 },
@@ -39,7 +37,6 @@ const UserDashboard = () => {
   ];
 
   const fetchTransactions = async () => {
-    setTransactionLoading(true);
     try {
       const res = await fetch("/api/member/transactions", {
         method: "GET",
@@ -56,7 +53,6 @@ const UserDashboard = () => {
     } catch (error) {
       console.log({ error });
     }
-    setTransactionLoading(false);
   };
 
   useEffect(() => {
