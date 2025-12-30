@@ -463,9 +463,14 @@ const MemberLists = ({ members }: MemberListsProps) => {
                   {kycLoadingFetch && <LoaderCircle className="animate-spin" />}
                   View KYC Documents
                 </Button>
-                <Button variant="outline" className="h-11 bg-transparent">
-                  View Transaction History
-                </Button>
+                <Link
+                  target="_blank"
+                  href={`/dashboard/transactions?userId=${selectedMember._id}`}
+                >
+                  <Button variant="outline" className="h-11 bg-transparent">
+                    View Transaction History
+                  </Button>
+                </Link>
               </div>
             </div>
           </Card>

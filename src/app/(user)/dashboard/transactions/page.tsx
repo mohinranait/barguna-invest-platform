@@ -15,12 +15,13 @@ interface PageProps {
     type?: string;
     from?: string;
     to?: string;
+    userId?: string;
   };
 }
 
 export default async function InvestmentsPage({ searchParams }: PageProps) {
   await connectDB();
-  const { search, type, from, to } = searchParams;
+  const { search, type, from, to, userId } = searchParams;
   const authUser = await isAuth();
 
   const filter: {
@@ -30,7 +31,7 @@ export default async function InvestmentsPage({ searchParams }: PageProps) {
     createdAt?: { $gte?: Date; $lte?: Date };
     ownerBy?: string;
   } = {
-    ownerBy: authUser?.userId,
+    ownerBy: userId ? userId : authUser?.userId,
   };
 
   /* ===== Type ===== */
