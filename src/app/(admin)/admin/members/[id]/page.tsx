@@ -1,5 +1,5 @@
 "use client";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -33,12 +33,20 @@ import {
   TUserStatus,
 } from "@/types/user.type";
 import { format } from "date-fns";
-import { AlertCircle, CalendarIcon, CheckCircle2, Loader2 } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  CalendarIcon,
+  CheckCircle2,
+  Info,
+  Loader2,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
 const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
-  console.log({ id: params.id });
-
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState("personal");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{
@@ -98,6 +106,7 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
     }
   };
 
+  // Fetch user data on mount
   const fetchUserData = async (id: string) => {
     setLoading(true);
     try {
@@ -134,13 +143,24 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
     <main className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-4xl">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">
-            Update User Information
-          </h1>
-          <p className="mt-2 text-muted-foreground">
-            Manage and update user details from the admin panel
-          </p>
+        <div className="mb-8 flex items-start gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => router.back()}
+            className="mt-1"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">
+              Update User Information
+            </h1>
+            <p className="mt-2 text-muted-foreground">
+              Manage and update user details from the admin panel
+            </p>
+          </div>
         </div>
 
         {/* Messages */}
@@ -164,7 +184,11 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
         )}
 
         {/* Form Tabs */}
-        <Tabs defaultValue="personal" className="w-full">
+        <Tabs
+          defaultValue="personal"
+          onValueChange={setActiveTab}
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="personal">Personal</TabsTrigger>
             <TabsTrigger value="account">Account</TabsTrigger>
@@ -337,13 +361,15 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Content */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="balance">Balance</Label>
                     <Input
                       id="balance"
                       type="number"
-                      value={formData.balance || 0}
+                      disabled
+                      value={formData.balance?.toFixed(2) || 0}
                       onChange={(e) =>
                         handleInputChange(
                           "balance",
@@ -359,7 +385,8 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
                     <Input
                       id="investedAmount"
                       type="number"
-                      value={formData.investedAmount || 0}
+                      disabled
+                      value={formData.investedAmount?.toFixed(2) || 0}
                       onChange={(e) =>
                         handleInputChange(
                           "investedAmount",
@@ -378,7 +405,8 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
                     <Input
                       id="withdrawAmount"
                       type="number"
-                      value={formData.withdrawAmount || 0}
+                      disabled
+                      value={formData.withdrawAmount?.toFixed(2) || 0}
                       onChange={(e) =>
                         handleInputChange(
                           "withdrawAmount",
@@ -394,18 +422,30 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
                     <Input
                       id="profitEarned"
                       type="number"
-                      value={formData.profitEarned || 0}
+                      value={formData.profitEarned?.toFixed(2) || 0}
                       onChange={(e) =>
                         handleInputChange(
                           "profitEarned",
                           Number.parseFloat(e.target.value)
                         )
                       }
+                      disabled
                       placeholder="0.00"
                       step="0.01"
                     />
                   </div>
                 </div>
+
+                {/* Alert */}
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertTitle>Read-only Section</AlertTitle>
+                  <AlertDescription>
+                    This tab is not editable. Financial information cannot be
+                    modified manually and is automatically managed by the
+                    system.
+                  </AlertDescription>
+                </Alert>
               </CardContent>
             </Card>
           </TabsContent>
@@ -450,17 +490,20 @@ const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
 
         {/* Submit Button */}
         <div className="mt-8 flex justify-end gap-4">
-          <Button variant="outline" onClick={() => window.history.back()}>
+          <Button variant="outline" onClick={() => router.back()}>
             Cancel
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="gap-2"
-          >
-            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-            {submitting ? "Updating..." : "Update User"}
-          </Button>
+
+          {activeTab !== "financial" && (
+            <Button
+              onClick={handleSubmit}
+              disabled={submitting}
+              className="gap-2"
+            >
+              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {submitting ? "Updating..." : "Update User"}
+            </Button>
+          )}
         </div>
       </div>
     </main>

@@ -1,5 +1,6 @@
 
 export interface IDistribution {
+    _id: string;
     createdBy: string;
     amount: number;
     members: number;
