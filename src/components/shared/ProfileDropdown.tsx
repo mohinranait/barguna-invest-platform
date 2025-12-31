@@ -31,7 +31,13 @@ const ProfileDropdown = () => {
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <Link href={user?.role === "admin" ? "/admin/dashboard" : "/dashboard"}>
+        <Link
+          href={
+            user?.role === "admin" || user?.role === "manager"
+              ? "/admin/dashboard"
+              : "/dashboard"
+          }
+        >
           <DropdownMenuItem>
             <LayoutDashboard /> Dashboard
           </DropdownMenuItem>

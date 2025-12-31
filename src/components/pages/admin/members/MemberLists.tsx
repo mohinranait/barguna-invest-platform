@@ -213,7 +213,7 @@ const MemberLists = ({ members }: MemberListsProps) => {
                   Phone
                 </th>
                 <th className="text-right py-3 font-medium text-muted-foreground">
-                  Invested
+                  Balance
                 </th>
                 <th className="text-center py-3 font-medium text-muted-foreground">
                   Status
@@ -240,7 +240,7 @@ const MemberLists = ({ members }: MemberListsProps) => {
                     {member?.phone}
                   </td>
                   <td className="py-3 text-right font-semibold">
-                    ৳ {member?.investedAmount.toLocaleString()}
+                    ৳ {member?.balance.toFixed(2)}
                   </td>
                   <td className="py-3 text-center">
                     <span

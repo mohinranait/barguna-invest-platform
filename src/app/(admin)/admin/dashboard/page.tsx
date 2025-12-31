@@ -30,21 +30,13 @@ export default async function AdminDashboard() {
     {
       id: 2,
       title: "Balance in Wallet",
-      value: `৳ ${wallet?.availableBalance.toLocaleString()}`,
+      value: `৳ ${wallet?.totalBalance.toLocaleString()}`,
       subtitle: "From all members",
       subtitleColor: "text-muted-foreground",
       icon: TrendingUp,
       iconColor: "text-secondary",
     },
-    {
-      id: 3,
-      title: "Profit Distributed",
-      value: `৳ ${totalDistributedProfit.toLocaleString()}`,
-      subtitle: "12.5% average return",
-      subtitleColor: "text-green-600",
-      icon: BarChart3,
-      iconColor: "text-primary",
-    },
+
     {
       id: 4,
       title: "Available balance",
@@ -55,6 +47,15 @@ export default async function AdminDashboard() {
       subtitleColor: "text-muted-foreground",
       icon: PieChartIcon,
       iconColor: "text-secondary",
+    },
+    {
+      id: 3,
+      title: "Profit Distributed",
+      value: `৳ ${totalDistributedProfit.toLocaleString()}`,
+      subtitle: "12.5% average return",
+      subtitleColor: "text-green-600",
+      icon: BarChart3,
+      iconColor: "text-primary",
     },
     {
       id: 1,
