@@ -26,6 +26,7 @@ const UserProvider = ({ children }: Props) => {
 
   // Reusable fetch function
   const refetchUser = async () => {
+    setLoading(true);
     try {
       const res = await fetch("/api/member/me", {
         method: "GET",

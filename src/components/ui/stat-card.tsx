@@ -26,10 +26,10 @@ export function StatCard({
 
   return (
     <Card className="p-6 gap-0 backdrop-blur-3xl  ">
-      <div className="flex items-start justify-between mb-2">
+      <div className="flex items-center gap-2 mb-2">
         <div className="text-primary">{icon}</div>
+        <p className="text-sm font-medium text-muted-foreground ">{label}</p>
       </div>
-      <p className="text-sm font-medium text-muted-foreground mb-2">{label}</p>
       <p className="text-3xl font-bold mb-2">{value}</p>
       {change && <p className={`text-xs ${changeColor}`}>{change}</p>}
     </Card>

@@ -43,7 +43,7 @@ export default async function StatementsPage() {
               <div className="text-sm font-medium text-muted-foreground mb-2">
                 Total Statements
               </div>
-              <div className="text-3xl font-bold">{distributions.length}</div>
+              <div className="text-3xl font-bold">{distributions?.length}</div>
               <div className="text-xs text-muted-foreground mt-2">
                 Available for download
               </div>
@@ -62,11 +62,14 @@ export default async function StatementsPage() {
                 Last Statement
               </div>
               <div className="text-3xl font-bold">
-                ৳ {distributions[0].amount}
+                ৳ {distributions[0]?.amount}
               </div>
               <div className="text-xs text-muted-foreground mt-2">
                 Date:{" "}
-                {format(new Date(distributions[0].createdAt), "MMM dd, yyyy")}
+                {format(
+                  new Date(distributions[0]?.createdAt || null),
+                  "MMM dd, yyyy"
+                )}
               </div>
             </Card>
           </div>

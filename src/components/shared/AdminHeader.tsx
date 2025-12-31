@@ -17,7 +17,7 @@ const AdminHeader = async () => {
         <li className="rounded-3xl py-2 px-3 bg-primary/10 text-primary border border-primary/20 font-medium">
           Balance:{" "}
           <span className="font-semibold">
-            ৳ {wallet.totalBalance?.toFixed(2).toLocaleString()}
+            ৳ {wallet?.totalBalance?.toFixed(2).toLocaleString() || "0.00"}
           </span>
         </li>
         <li>

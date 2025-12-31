@@ -4,6 +4,7 @@ import UserContainer from "@/components/shared/UserContainer";
 import UserHeader from "@/components/shared/UserHeader";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import StatCard from "@/components/ui/stat-card";
 import { useUser } from "@/providers/UserProvider";
 import { ITransaction } from "@/types/transaction.type";
@@ -24,7 +25,7 @@ import {
 } from "recharts";
 
 const UserDashboard = () => {
-  const { user } = useUser();
+  const { user, userLoading } = useUser();
 
   const [transactions, setTransactions] = useState<ITransaction[]>([]);
   const profitData = [
@@ -79,24 +80,46 @@ const UserDashboard = () => {
           </div>
           {/* KPI Cards */}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 pt-4 gap-4 lg:gap-6">
-            <StatCard
-              icon={<TrendingUp className="text-primary" size={24} />}
-              label="Current Balance"
-              value={`৳ ${user?.balance.toLocaleString()}`}
-            />
+            {userLoading ? (
+              <>
+                {[1, 2, 3].map((i) => (
+                  <Card key={i} className="p-6 gap-0 backdrop-blur-3xl">
+                    {/* Icon + Label */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <Skeleton className="h-5 w-5 rounded-full" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
 
-            <StatCard
-              icon={<TrendingDown className="text-primary" size={24} />}
-              label="Total Invested"
-              value={`৳ ${user?.investedAmount.toLocaleString()}`}
-            />
-            <StatCard
-              icon={<TrendingUp className="text-primary" size={24} />}
-              label="Total Profit Earned"
-              value={`৳ ${user?.profitEarned.toLocaleString()}`}
-              change="+12.5%"
-              changeType="positive"
-            />
+                    {/* Value */}
+                    <Skeleton className="h-8 w-40 mb-2" />
+
+                    {/* Change */}
+                    <Skeleton className="h-3 w-20" />
+                  </Card>
+                ))}
+              </>
+            ) : (
+              <>
+                <StatCard
+                  icon={<TrendingUp className="text-primary" size={18} />}
+                  label="Current Balance"
+                  value={`৳ ${user?.balance.toLocaleString()}`}
+                />
+
+                <StatCard
+                  icon={<TrendingDown className="text-primary" size={18} />}
+                  label="Total Invested"
+                  value={`৳ ${user?.investedAmount.toLocaleString()}`}
+                />
+                <StatCard
+                  icon={<TrendingUp className="text-primary" size={18} />}
+                  label="Total Profit Earned"
+                  value={`৳ ${user?.profitEarned.toLocaleString()}`}
+                  change="+12.5%"
+                  changeType="positive"
+                />
+              </>
+            )}
           </div>
         </UserContainer>
       </div>
