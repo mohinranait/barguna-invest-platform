@@ -40,6 +40,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import LoadingSpinner from "@/components/ui/loading-spinner";
+import KycApprovelAlert from "@/components/shared/KycApprovelAlert";
 
 export default function WithdrawalsPage() {
   const { user } = useUser();
@@ -176,6 +177,48 @@ export default function WithdrawalsPage() {
       <UserContainer className="pt-4 pb-8">
         <UserHeader />
         <div className="pt-4 space-y-5">
+          {/* Balance Summary */}
+          <div className="grid md:grid-cols-3 gap-6">
+            <Card className="p-6 gap-0">
+              <div className="text-sm font-medium text-muted-foreground mb-2">
+                Available Balance
+              </div>
+              <div className="text-3xl font-bold">
+                ৳ {user?.balance?.toLocaleString()}
+              </div>
+              <div className="text-xs text-muted-foreground mt-2">
+                Can withdraw up to this amount
+              </div>
+            </Card>
+
+            <Card className="p-6 gap-0">
+              <div className="text-sm font-medium text-muted-foreground mb-2">
+                Pending Withdrawals
+              </div>
+              <div className="text-3xl font-bold">
+                ৳ {pendingAmount?.toLocaleString()}
+              </div>
+              <div className="text-xs text-yellow-600 mt-2">
+                Awaiting approval
+              </div>
+            </Card>
+
+            <Card className="p-6 gap-0">
+              <div className="text-sm font-medium text-muted-foreground mb-2">
+                Completed Withdrawals
+              </div>
+              <div className="text-3xl font-bold">
+                ৳ {approvedAmount?.toLocaleString()}
+              </div>
+              <div className="text-xs text-green-600 mt-2">
+                Successfully withdrawn
+              </div>
+            </Card>
+          </div>
+
+          {/* Kyc verification alert */}
+          <KycApprovelAlert />
+
           {/* Header */}
           <div className="flex flex-wrap gap-4 items-center justify-between">
             <div>
@@ -188,7 +231,10 @@ export default function WithdrawalsPage() {
             {/* Withdrawal Modal Trigger */}
             <Dialog open={showForm} onOpenChange={setShowForm}>
               <DialogTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90 gap-2">
+                <Button
+                  disabled={user?.kycStatus !== "approved"}
+                  className="bg-primary hover:bg-primary/90 gap-2"
+                >
                   <Plus size={20} /> Request Withdrawal
                 </Button>
               </DialogTrigger>
@@ -320,45 +366,6 @@ export default function WithdrawalsPage() {
                 </form>
               </DialogContent>
             </Dialog>
-          </div>
-
-          {/* Balance Summary */}
-          <div className="grid md:grid-cols-3 gap-6">
-            <Card className="p-6 gap-0">
-              <div className="text-sm font-medium text-muted-foreground mb-2">
-                Available Balance
-              </div>
-              <div className="text-3xl font-bold">
-                ৳ {user?.balance?.toLocaleString()}
-              </div>
-              <div className="text-xs text-muted-foreground mt-2">
-                Can withdraw up to this amount
-              </div>
-            </Card>
-
-            <Card className="p-6 gap-0">
-              <div className="text-sm font-medium text-muted-foreground mb-2">
-                Pending Withdrawals
-              </div>
-              <div className="text-3xl font-bold">
-                ৳ {pendingAmount?.toLocaleString()}
-              </div>
-              <div className="text-xs text-yellow-600 mt-2">
-                Awaiting approval
-              </div>
-            </Card>
-
-            <Card className="p-6 gap-0">
-              <div className="text-sm font-medium text-muted-foreground mb-2">
-                Completed Withdrawals
-              </div>
-              <div className="text-3xl font-bold">
-                ৳ {approvedAmount?.toLocaleString()}
-              </div>
-              <div className="text-xs text-green-600 mt-2">
-                Successfully withdrawn
-              </div>
-            </Card>
           </div>
 
           {/* Withdrawal History */}

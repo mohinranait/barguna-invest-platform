@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import KycApprovelAlert from "@/components/shared/KycApprovelAlert";
 
 export default function DepositsPage() {
   const { user } = useUser();
@@ -175,6 +176,9 @@ export default function DepositsPage() {
         />
       </div>
 
+      {/* Kyc verification alert */}
+      <KycApprovelAlert />
+
       <div className="flex flex-wrap gap-3 items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Deposit </h1>
@@ -185,7 +189,7 @@ export default function DepositsPage() {
 
         <Dialog open={openModal} onOpenChange={setOpenModal}>
           <DialogTrigger asChild>
-            <Button className="px-6">
+            <Button className="px-6" disabled={user?.kycStatus !== "approved"}>
               <Plus /> New Deposit
             </Button>
           </DialogTrigger>
