@@ -67,6 +67,7 @@ export default async function ProfitDistributionPage() {
       {/* Distribution History */}
       <Card className="p-6 ">
         <h2 className="text-lg font-semibold ">Recent Distributions</h2>
+        {/* StatementLine component */}
         <StatementLine />
       </Card>
     </div>
