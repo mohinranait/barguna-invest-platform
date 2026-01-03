@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Deposit verification page loading skeleton
 function DepositVerificationLoading() {
   return (
     <div className="p-6 md:p-8 space-y-6">

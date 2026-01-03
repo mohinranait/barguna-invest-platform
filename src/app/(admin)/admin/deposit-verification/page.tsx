@@ -14,6 +14,7 @@ import { CheckCircle, DollarSign } from "lucide-react";
 import { useUser } from "@/providers/UserProvider";
 import { IDeposit } from "@/types/deposit.type";
 
+// Deposit verification page
 export default function DepositVerificationPage() {
   const { user } = useUser();
   const [deposits, setDeposits] = useState<IDeposit[]>([]);
