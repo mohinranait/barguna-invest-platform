@@ -8,6 +8,7 @@ import { IUser } from "@/types/user.type";
 import { IWallet } from "@/types/wallet.type";
 import StatementLine from "@/components/shared/StatementLine";
 
+// Distribution page
 export default async function ProfitDistributionPage() {
   await connectDB();
   const getAllUsers = await User.find({}).select("fullName status balance");
@@ -39,13 +40,17 @@ export default async function ProfitDistributionPage() {
           <div className="text-sm font-medium text-muted-foreground mb-1">
             Available balance for share
           </div>
-          <div className="text-3xl font-bold">৳ {availableBalance || 0}</div>
+          <div className="text-3xl font-bold">
+            ৳ {availableBalance ? availableBalance : "0.00"}
+          </div>
         </Card>
         <Card className="p-4 gap-0">
           <div className="text-sm font-medium text-muted-foreground mb-1">
             Main Balance
           </div>
-          <div className="text-3xl font-bold">৳ {wallet?.totalBalance}</div>
+          <div className="text-3xl font-bold">
+            ৳ {wallet?.totalBalance ? wallet?.totalBalance : "0.00"}
+          </div>
         </Card>
         <Card className="p-4 gap-0">
           <div className="text-sm font-medium text-muted-foreground mb-1">
