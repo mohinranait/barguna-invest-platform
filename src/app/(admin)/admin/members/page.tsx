@@ -4,6 +4,7 @@ import MemberLists from "@/components/pages/admin/members/MemberLists";
 import { connectDB } from "@/lib/db";
 import { User } from "@/models/user.model";
 
+// Members Page - Admin
 export default async function MembersPage() {
   await connectDB();
   const getMembers = await User.find({})
