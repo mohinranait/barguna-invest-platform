@@ -44,6 +44,7 @@ import {
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
+// Update member page
 const UpdateMemberPage = ({ params }: { params: { id: string } }) => {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("personal");

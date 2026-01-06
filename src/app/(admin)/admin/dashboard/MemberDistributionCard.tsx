@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import React from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
 
+// Member distributaion card
 const MemberDistributionCard = () => {
   return (
     <Card className="p-6">
