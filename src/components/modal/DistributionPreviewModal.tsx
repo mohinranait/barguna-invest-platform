@@ -17,6 +17,7 @@ interface Props {
   data: IDistribution | null;
 }
 
+// distribution preview modal component
 const DistributionPreviewModal = ({ open, onOpenChange, data }: Props) => {
   const [records, setRecords] = useState<IDistributionRecord[]>([]);
   const fetchDistributions = async (id: string) => {

@@ -6,6 +6,7 @@ import { connectDB } from "@/lib/db";
 import { CompanyWallet } from "@/models/CompanyWallet.model";
 import { IWallet } from "@/types/wallet.type";
 
+// admin header component
 const AdminHeader = async () => {
   await connectDB();
   const getWallet = await CompanyWallet.findOne({});
