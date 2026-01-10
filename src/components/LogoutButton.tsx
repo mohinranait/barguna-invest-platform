@@ -7,6 +7,7 @@ type Props = {
   children?: React.ReactNode;
   className?: string;
 };
+// Logout button component
 const LogoutButton = ({ children, className }: Props) => {
   const router = useRouter();
   const handleLogout = async () => {
