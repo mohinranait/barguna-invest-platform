@@ -11,8 +11,6 @@ type Props = {
 const LogoutButton = ({ children, className }: Props) => {
   const router = useRouter();
   const handleLogout = async () => {
-    console.log("Clicked");
-
     const res = await fetch(`/api/auth/logout`, {
       method: "GET",
     });
